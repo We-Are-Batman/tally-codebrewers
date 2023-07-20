@@ -3,7 +3,9 @@ import hashlib
 from collections import defaultdict
 import difflib
 import filecmp
-#this will return the has for a particular file based on it's content
+# this will return the has for a particular file based on it's content
+
+
 def get_file_hash(file_path):
     sha256_hash = hashlib.sha256()
     with open(file_path, "rb") as f:
@@ -20,8 +22,9 @@ def find_duplicate_files(directory):
             file_path = os.path.join(dirpath, filename)
             file_hash = get_file_hash(file_path)
             file_hashes[file_hash].append(file_path)
-    
+
     return {file_hash: paths for file_hash, paths in file_hashes.items() if len(paths) > 1}
+
 
 def find_similar_filenames(directory, similarity_threshold=0.85):
     similar_files = {}
@@ -33,7 +36,8 @@ def find_similar_filenames(directory, similarity_threshold=0.85):
 
             found_group = None
             for group_key, group_files in similar_files.items():
-                similarity = difflib.SequenceMatcher(None, file1_key, group_key).ratio()
+                similarity = difflib.SequenceMatcher(
+                    None, file1_key, group_key).ratio()
                 if similarity >= similarity_threshold:
                     found_group = group_key
                     break
@@ -43,9 +47,11 @@ def find_similar_filenames(directory, similarity_threshold=0.85):
             else:
                 similar_files[found_group].append(file1_path)
 
-    similar_files = {key: value for key, value in similar_files.items() if len(value) > 1}
+    similar_files = {key: value for key,
+                     value in similar_files.items() if len(value) > 1}
 
     return similar_files
+
 
 def find_similar_files(directory, similarity_threshold=0.85):
     similar_files = {}
@@ -62,7 +68,8 @@ def find_similar_files(directory, similarity_threshold=0.85):
                 for file2_path in group_files:
                     with open(file2_path, 'r', encoding='utf-8', errors='ignore') as f:
                         content2 = f.read()
-                    similarity = difflib.SequenceMatcher(None, content1, content2).ratio()
+                    similarity = difflib.SequenceMatcher(
+                        None, content1, content2).ratio()
                     if similarity >= similarity_threshold:
                         similar_group = group_key
                         break
@@ -74,9 +81,9 @@ def find_similar_files(directory, similarity_threshold=0.85):
             else:
                 similar_files[similar_group].append(file_path)
 
-    similar_files = {key: value for key, value in similar_files.items() if len(value) > 1}
+    similar_files = {key: value for key,
+                     value in similar_files.items() if len(value) > 1}
     return similar_files
-
 
 
 def duplicatefiles(directory):
@@ -92,8 +99,9 @@ def duplicatefiles(directory):
             for file_path in file_paths:
                 print(f" - {file_path}")
 
+
 def similarfiles(directory):
-    directory_path=directory
+    directory_path = directory
     similar_files = find_similar_filenames(directory_path)
 
     if not similar_files:
@@ -106,14 +114,6 @@ def similarfiles(directory):
                 print(f" - File: {os.path.basename(file_path)}")
                 print(f"   Path: {file_path}")
             print()
-
-
-
-
-
-
-
-
 
 
 def files_with_similar_content(directory_path):
@@ -146,9 +146,11 @@ def get_file_metadata(file_path):
         print(f"Error reading metadata for {file_path}: {e}")
         return None
 
+
 def metadata_matches(metadata1, metadata2):
-    #check for one paramteter here
+    # check for one paramteter here
     return any(metadata1[key] == metadata2[key] for key in metadata1)
+
 
 def identify_similar_files(directory):
     file_metadata_dict = {}
@@ -163,11 +165,11 @@ def identify_similar_files(directory):
 
     for file1, metadata1 in file_metadata_dict.items():
         for file2, metadata2 in file_metadata_dict.items():
-           if file1 != file2 and metadata_matches(metadata1, metadata2) and metadata1["file_size"] == metadata2["file_size"]:
-                    similar_files.append((file1, file2))
-
+            if file1 != file2 and metadata_matches(metadata1, metadata2) and metadata1["file_size"] == metadata2["file_size"]:
+                similar_files.append((file1, file2))
 
     return similar_files
+
 
 def identicalFilesbasedOnMetadata(directory_to_scan):
     # print("Helo")
@@ -179,5 +181,6 @@ def identicalFilesbasedOnMetadata(directory_to_scan):
         print("Similar files:")
         for file_pair in similar_files:
             print(file_pair)
+
 
 directory_path = r"D:\University\Lab\AI\Assignment 4"
