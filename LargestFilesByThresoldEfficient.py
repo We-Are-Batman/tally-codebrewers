@@ -44,6 +44,9 @@ def search_files_in_drive(root_path,thresold,extension):
 
     # Create a ThreadPoolExecutor with a number of threads (use as many as the number of CPU cores)
     num_threads = min(len(directories), os.cpu_count())
+    if num_threads == 0:
+        find_files(root_path, found_files,thresold,extension)
+        return found_files
     with concurrent.futures.ThreadPoolExecutor(max_workers=num_threads) as executor:
         future_to_directory = {executor.submit(find_files, directory, found_files,thresold,extension): directory for directory in directories}
 
@@ -58,7 +61,7 @@ def search_files_in_drive(root_path,thresold,extension):
     return found_files
 
 if __name__ == "__main__":
-    drive_path = "F:\\" # Replace with the drive letter you want to search
+    drive_path =r"C:\Users\adnan\OneDrive\Pictures\Screenshots"  # Replace with the drive letter you want to search
     thresold = 2000
     extension = "*"
     

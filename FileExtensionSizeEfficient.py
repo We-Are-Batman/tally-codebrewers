@@ -14,6 +14,7 @@ def find_files(directory, file_dict):
     for root, _, files in os.walk(directory):
         for filename in files:
             try:
+                print(filename)
                 file_path = os.path.join(root, filename)
                 file_stats = os.stat(file_path)
                 split_tup = os.path.splitext(filename)
@@ -29,6 +30,7 @@ def find_files(directory, file_dict):
                     file_dict[actual_type] = 0
 
                 file_dict[actual_type] = file_dict[actual_type] +  file_stats.st_size
+                
             except:
                 pass
 
@@ -41,6 +43,9 @@ def search_files_in_drive(root_path):
 
     # Create a ThreadPoolExecutor with a number of threads (use as many as the number of CPU cores)
     num_threads = min(len(directories), os.cpu_count())
+    if num_threads == 0:
+        find_files(root_path, found_files)
+        return found_files
     with concurrent.futures.ThreadPoolExecutor(max_workers=num_threads) as executor:
         future_to_directory = {executor.submit(find_files, directory, found_files): directory for directory in directories}
 
@@ -55,11 +60,11 @@ def search_files_in_drive(root_path):
     return found_files
 
 if __name__ == "__main__":
-    drive_path = "C:\\" # Replace with the drive letter you want to search
+    drive_path = r"C:\Users\adnan\OneDrive\Pictures\Screenshots" # Replace with the drive letter you want to search
      # Add more extensions if needed
 
     found_files = search_files_in_drive(drive_path)
-    print(f"Found {len(found_files)} files in drive {drive_path}:")
+    print(f"Found {len(found_files)} file types in path {drive_path}:")
     for extension,size in found_files.items():
         tot = float("{:.2f}".format(size / (1024.0)))
         print(f"for extension {extension} size is {tot} KB")
