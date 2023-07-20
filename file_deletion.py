@@ -23,9 +23,9 @@ def get_all_files_and_folders(directory):
             all_paths.append(folder_path)
     return all_paths
 
-def delete_files_multithread(directory, num_threads=4):
+def delete_files_multithread(paths_to_delete, num_threads=4):
     # Split the paths_to_delete list into smaller chunks for each thread
-    paths_to_delete = [os.path.join(directory, file) for file in os.listdir(directory)]
+    
     
     num_paths = len(paths_to_delete)
     if num_paths == 0:
@@ -48,4 +48,5 @@ def delete_files_multithread(directory, num_threads=4):
 
 if __name__ == "__main__":
     directory = r"C:\Users\kabir\OneDrive\Desktop\testfile"
-    delete_files_multithread(directory)
+    paths_to_delete = [os.path.join(directory, file) for file in os.listdir(directory)]
+    delete_files_multithread(paths_to_delete)
