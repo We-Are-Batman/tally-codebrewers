@@ -54,7 +54,7 @@ def get_files_and_metadata(folder_path):
     return file_dict
 
 # Replace "C:\Your\Drive\Path" with the drive path you want to scan.
-drive_path = "F:\\"
+drive_path = "C:\\"
 files_and_metadata = get_files_and_metadata(drive_path)
 
 for extension,size in files_and_metadata.items():
