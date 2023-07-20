@@ -3,6 +3,7 @@ import hashlib
 from collections import defaultdict
 import difflib
 import filecmp
+from file_deletion import delete_files_multithread
 #this will return the has for a particular file based on it's content
 def get_file_hash(file_path):
     sha256_hash = hashlib.sha256()
@@ -180,4 +181,74 @@ def identicalFilesbasedOnMetadata(directory_to_scan):
         for file_pair in similar_files:
             print(file_pair)
 
-directory_path = r"D:\University\Lab\AI\Assignment 4"
+
+
+def get_most_recent_file(file_paths):
+    most_recent_file = None
+    most_recent_time = 0
+
+    for file_path in file_paths:
+        try:
+            access_time = os.path.getatime(file_path)
+            if access_time > most_recent_time:
+                most_recent_time = access_time
+                most_recent_file = file_path
+        except Exception as e:
+            print(f"Error getting access time for {file_path}: {e}")
+
+    return most_recent_file
+
+def automaticDeletion(duplicate_files):
+    filepaths=[]
+    for file_hash, file_paths in duplicate_files.items():
+        
+            print(f"Hash: {file_hash}")
+
+            file_to_keep=get_most_recent_file(file_paths)
+            for file_path in file_paths:
+                print(f" - {file_path}")
+                if file_path != file_to_keep:
+                    filepaths.append(file_path)
+    delete_files_multithread(filepaths)
+
+def manualDeletion(duplicate_files):
+    filepaths=[]
+    for file_hash, file_paths in duplicate_files.items():
+        
+            print(f"Hash: {file_hash}")
+            i=1
+            mp={}
+            for file_path in file_paths:
+                print(f"{i} - {file_path}")
+                mp[i]=file_path
+                i=i+1
+            index=int(input("Select the file number you want to keep"))
+            print(mp)
+            file_to_keep=mp[index]
+
+            for file_path in file_paths:
+                print(f" - {file_path}")
+                if file_path != file_to_keep:
+                    filepaths.append(file_path)
+    delete_files_multithread(filepaths)
+
+def deleteDuplicateFiles(directory_path):
+    duplicate_files = find_duplicate_files(directory_path)
+    
+    if not duplicate_files:
+        print("No duplicate files found.")
+    else:
+        print("Duplicate files:")
+        
+        print(duplicate_files)
+
+        choice=int(input("Do you want to choose the file to keep or do it automatically?"))
+        if choice==1:
+            automaticDeletion(duplicate_files)
+        elif choice==2:
+            manualDeletion(duplicate_files)
+
+
+
+directory_path = r"C:\Users\kabir\OneDrive\Desktop\testfile"
+deleteDuplicateFiles(directory_path)
