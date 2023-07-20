@@ -2,6 +2,7 @@ import os
 import hashlib
 from collections import defaultdict
 import difflib
+import filecmp
 #this will return the has for a particular file based on it's content
 def get_file_hash(file_path):
     sha256_hash = hashlib.sha256()
@@ -130,5 +131,54 @@ def files_with_similar_content(directory_path):
                 print(f"   Path: {file_path}")
             print()
 
+
+def get_file_metadata(file_path):
+    try:
+        # file_stat = os.stat(file_path)
+        metadata = {
+            "file_path": file_path,
+            "file_size": os.path.getsize(file_path),
+            "creation_time": int(os.path.getctime(file_path)),
+            "modification_time": int(os.path.getmtime(file_path))
+        }
+        # print(metadata)
+        return metadata
+    except Exception as e:
+        print(f"Error reading metadata for {file_path}: {e}")
+        return None
+
+def metadata_matches(metadata1, metadata2):
+    #check for one paramteter here
+    return any(metadata1[key] == metadata2[key] for key in metadata1)
+
+def identify_similar_files(directory):
+    file_metadata_dict = {}
+    similar_files = []
+
+    for dirpath, _, filenames in os.walk(directory):
+        for filename in filenames:
+            file_path = os.path.join(dirpath, filename)
+            metadata = get_file_metadata(file_path)
+            if metadata:
+                file_metadata_dict[file_path] = metadata
+
+    for file1, metadata1 in file_metadata_dict.items():
+        for file2, metadata2 in file_metadata_dict.items():
+           if file1 != file2 and metadata_matches(metadata1, metadata2) and metadata1["file_size"] == metadata2["file_size"]:
+                    similar_files.append((file1, file2))
+
+
+    return similar_files
+
+def identicalFilesbasedOnMetadata(directory_to_scan):
+    # print("Helo")
+    similar_files = identify_similar_files(directory_to_scan)
+    # print("Hello")
+    if not similar_files:
+        print("No similar files found.")
+    else:
+        print("Similar files:")
+        for file_pair in similar_files:
+            print(file_pair)
 
 directory_path = r"D:\University\Lab\AI\Assignment 4"
