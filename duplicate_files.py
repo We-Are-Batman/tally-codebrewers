@@ -136,7 +136,6 @@ def get_file_metadata(file_path):
     try:
         # file_stat = os.stat(file_path)
         metadata = {
-            "file_path": file_path,
             "file_size": os.path.getsize(file_path),
             "creation_time": int(os.path.getctime(file_path)),
             "modification_time": int(os.path.getmtime(file_path))
