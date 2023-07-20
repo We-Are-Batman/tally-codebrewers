@@ -1,10 +1,17 @@
 import os
 import time
+import json
 
 
 extensions = {}
 
-# read from file_association.json and put it in a set
+#read from  json file into dictionary
+
+with open('file_association.json') as json_file:
+    extensions = json.load(json_file)
+
+
+
 
 
 
@@ -20,7 +27,7 @@ def get_files_and_metadata(folder_path):
             split_tup = os.path.splitext(filename)
             file_extension = split_tup[1]
             # print(filename,file_extension)
-            if  file_dict.get(file_extension)==None and len(file_extension)>1:
+            if  file_dict.get(extensions[file_extension])==None and len(file_extension)>1:
                 file_dict[file_extension] = 0
             if len(file_extension)>1 :
                 file_dict[file_extension] = file_dict[file_extension] +  file_stats.st_size
