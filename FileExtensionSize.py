@@ -26,11 +26,18 @@ def get_files_and_metadata(folder_path):
             file_stats = os.stat(file_path)
             split_tup = os.path.splitext(filename)
             file_extension = split_tup[1]
+            if len(file_extension)<1:
+                continue
+            if file_extension not in extensions:
+                actual_type = "documents"
+            else:
+                actual_type = extensions[file_extension]
+
             # print(filename,file_extension)
-            if  file_dict.get(extensions[file_extension])==None and len(file_extension)>1:
-                file_dict[file_extension] = 0
-            if len(file_extension)>1 :
-                file_dict[file_extension] = file_dict[file_extension] +  file_stats.st_size
+            if file_dict.get(actual_type)==None:
+                file_dict[actual_type] = 0
+
+            file_dict[actual_type] = file_dict[actual_type] +  file_stats.st_size
 
             # file_info = {
             #     "name": filename,
@@ -51,4 +58,5 @@ drive_path = "F:\\"
 files_and_metadata = get_files_and_metadata(drive_path)
 
 for extension,size in files_and_metadata.items():
-    print(f"for extension {extension} size is {size} bytes")
+    tot = float("{:.2f}".format(size / (1024.0)))
+    print(f"for extension {extension} size is {tot} KB")
