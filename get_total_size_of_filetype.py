@@ -14,13 +14,11 @@ with open('file_association.json') as json_file:
 
 
 
-def get_totalsize_of_filetype(root_path):
+def get_totalsize_of_filetype_helper(root_path):
     found_files = {}
-    total_folder_size = 0
 
     def find_files(directory):
         file_dict = {}
-        size = 0
         for root, _, files in os.walk(directory):
             for filename in files:
                 try:
@@ -28,6 +26,7 @@ def get_totalsize_of_filetype(root_path):
                     file_stats = os.stat(file_path)
                     # split_tup = os.path.splitext(filename,file_stats.st_size)
                     file_extension = identify_file_extension(file_path)
+                    print(file_extension)
                     # print(filename,file_extension)
                     if len(file_extension) < 1:
                         continue
@@ -40,17 +39,15 @@ def get_totalsize_of_filetype(root_path):
                         file_dict[actual_type] = 0
 
                     file_dict[actual_type] = file_dict[actual_type] + file_stats.st_size
-                    size = size + file_stats.st_size
 
                 except:
                     pass
-        return file_dict, size
+        return file_dict
 
     def process_directory(dir_path):
         nonlocal total_folder_size
-        file_dict,folder_size = find_files(dir_path)
+        file_dict = find_files(dir_path)
         found_files.update(file_dict)
-        total_folder_size += folder_size
 
 
     directories = []
@@ -63,6 +60,7 @@ def get_totalsize_of_filetype(root_path):
                 file_stats = os.stat(file_path)
                 file_extension = identify_file_extension(file_path)
                 # print(d,file_extension)
+                print(file_extension)
                 if len(file_extension) < 1:
                     continue
                 if file_extension not in extensions:
@@ -74,7 +72,6 @@ def get_totalsize_of_filetype(root_path):
                     found_files[actual_type] = 0
 
                 found_files[actual_type] = found_files[actual_type] + file_stats.st_size
-                total_folder_size += file_stats.st_size
             except:
                 pass
             
@@ -95,10 +92,15 @@ def get_totalsize_of_filetype(root_path):
                     print(
                         f"An error occurred while searching in {directory}: {e}")
 
-    return found_files, total_folder_size
+        total_folder_size = 0
+    return found_files
 
 
-# files,size = get_totalsize_of_filetype("E://")
-# for type,size in files.items():
-#     print(type,size)
-# print(size)
+def get_totalsize_of_filetype(root_path):
+    files = get_totalsize_of_filetype_helper(root_path)
+    return files,sum(files.values())
+
+files,size = get_totalsize_of_filetype("C:\\Users\\ACER\Pictures\\Camera Roll\\")
+for type,size in files.items():
+    print(type,size)
+print(size)
