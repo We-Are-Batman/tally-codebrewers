@@ -204,17 +204,13 @@ def get_most_recent_file(file_paths):
     return most_recent_file
 
 def automaticDeletion(duplicate_files):
-    filepaths=[]
-    for file_hash, file_paths in duplicate_files.items():
-        
-            print(f"Hash: {file_hash}")
-
-            file_to_keep=get_most_recent_file(file_paths)
-            for file_path in file_paths:
-                print(f" - {file_path}")
-                if file_path != file_to_keep:
-                    filepaths.append(file_path)
-    delete_files_multithread(filepaths)
+    # print(f"Hash: {file_hash}")
+    file_to_keep=get_most_recent_file(duplicate_files)
+    for file_path in duplicate_files:
+        # print(f" - {file_path}")
+        if file_path == file_to_keep:
+            duplicate_files.remove(file_path)
+    delete_files_multithread(duplicate_files)
 
 def manualDeletion(duplicate_files):
     filepaths=[]
