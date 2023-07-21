@@ -1,6 +1,7 @@
 import os
 import zipfile
 from datetime import datetime
+from file_deletion import delete_files_multithread
 
 def create_zip(file_paths,output_directory ):
     output_zip_filename = 'output_files.zip'
@@ -16,6 +17,7 @@ def create_zip(file_paths,output_directory ):
             else:
                 print(f"Warning: '{file_path}' is not a valid file path. Skipping.")
 
+    delete_files_multithread(file_path)
     print(f"Zip file created at '{output_path}'.")
 
 # Example usage:
