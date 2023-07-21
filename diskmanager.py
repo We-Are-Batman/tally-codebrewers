@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import Scrollbar
 from tkinter import filedialog
+from tkinter import messagebox
 import win32api
 import psutil
 import json
@@ -56,10 +57,23 @@ def select_all_rows(tree,select_string_var):
             tree.selection_remove(tree.selection())
             select_string_var.set("Select All Rows")
 
+def preview_btn_click(path,tree,error_label):
+        selected_item = tree.selection()
+        if len(selected_item) == 0:
+            error_label.config(text="Please select a file to preview.")
+        elif len(selected_item) > 1:
+            error_label.config(text="Please select only one file to preview.")
+        else:
+            selected_row = tree.item(selected_item)
+            selected_path = selected_row['values'][0]  # Assuming the path is in the first column 'fpath'
+            selected_path = os.path.join(path,selected_path)
+            preview_file(selected_path)
 
-
-def delete_selected_files(path, tree,page):
+def delete_selected_files(path, tree,page,error_label):
     selected_items = tree.selection()
+    if len(selected_items) == 0:
+        error_label.config(text="Please select a file to delete.")
+        return
     paths_to_delete = []
     for item in selected_items:
         selected_row = tree.item(item)
@@ -76,9 +90,12 @@ def delete_selected_files(path, tree,page):
     elif page=="extension":
         show_duplicate_files_page(path)
 
-def delete_auto_selected_files(path, tree):
+def delete_auto_selected_files(path, tree,error_label):
     #get all tree items
     items = tree.get_children()
+    if len(items) == 0:
+        error_label.config(text="Please select a file to delete.")
+        return
     paths_to_delete = []
     for item in items:
         selected_row = tree.item(item)
@@ -103,13 +120,6 @@ def show_duplicate_files_page(path):
         show_insights_page(path)
         frames["duplicate_files"].destroy()
 
-    def preview_btn_click():
-        selected_item = tree.selection()
-        if selected_item:
-            selected_row = tree.item(selected_item)
-            selected_path = selected_row['values'][0]  # Assuming the path is in the first column 'fpath'
-            preview_file(selected_path)
-    
     ind =0
 
     def insert_in_tree():
@@ -201,13 +211,13 @@ def show_duplicate_files_page(path):
     select_all_btn = tk.Button(frame3, textvariable=select_string_var, bg="#f0f0f0", fg="#000000",font=("Helvetica", 10, "bold"),width=40,command=lambda: select_all_rows(tree,select_string_var))
     select_all_btn.pack(anchor='center',padx=20, pady=10)
 
-    preview_btn = tk.Button(frame3, text="Preview", bg="#f0f0f0", fg="#0000ff",font=("Helvetica", 10, "bold"),width=40,command=lambda: preview_btn_click())
+    preview_btn = tk.Button(frame3, text="Preview", bg="#f0f0f0", fg="#0000ff",font=("Helvetica", 10, "bold"),width=40,command=lambda: preview_btn_click(path,tree,error_label))
     preview_btn.pack(anchor='center',padx=20, pady=10)
 
-    delete_auto_btn = tk.Button(frame3, text="Delete Automatically", bg="#f0f0f0", fg="#ff0000",font=("Helvetica", 10, "bold"),width=40,command=lambda: delete_auto_selected_files(path,tree))
+    delete_auto_btn = tk.Button(frame3, text="Delete Automatically", bg="#f0f0f0", fg="#ff0000",font=("Helvetica", 10, "bold"),width=40,command=lambda: delete_auto_selected_files(path,tree,error_label))
     delete_auto_btn.pack(anchor='center',padx=20, pady=10)
 
-    delete_manually_btn = tk.Button(frame3, text="Delete Manually", bg="#f0f0f0", fg="#ff0000",font=("Helvetica", 10, "bold"),width=40,command=lambda: delete_selected_files(path,tree,"duplicate"))
+    delete_manually_btn = tk.Button(frame3, text="Delete Manually", bg="#f0f0f0", fg="#ff0000",font=("Helvetica", 10, "bold"),width=40,command=lambda: delete_selected_files(path,tree,"duplicate",error_label))
     delete_manually_btn.pack(anchor='center',padx=20, pady=10)
 
     frame3.pack(anchor='center',padx=20, pady=10)
@@ -248,13 +258,7 @@ def show_large_files_page(path,threshold=0.0,extension="*"):
         show_insights_page(path)
         frames["large_files"].destroy()
     
-    def preview_btn_click():
-        selected_item = tree.selection()
-        if selected_item:
-            selected_row = tree.item(selected_item)
-            selected_path = selected_row['values'][0]  # Assuming the path is in the first column 'fpath'
-            selected_path = os.path.join(path,selected_path)
-            preview_file(selected_path)
+
 
     frame = tk.Frame(root, bg="#93a8f5")
 
@@ -308,11 +312,11 @@ def show_large_files_page(path,threshold=0.0,extension="*"):
     select_all_btn = tk.Button(frame3, textvariable=select_string_var, bg="#f0f0f0", fg="#000000",font=("Helvetica", 10, "bold"),width=40,command=lambda: select_all_rows(tree,select_string_var))
     select_all_btn.pack(anchor='center',padx=20, pady=10)
 
-    preview_btn = tk.Button(frame3, text="Preview", bg="#f0f0f0", fg="#0000ff",font=("Helvetica", 10, "bold"),width=40,command=lambda: preview_btn_click())
+    preview_btn = tk.Button(frame3, text="Preview", bg="#f0f0f0", fg="#0000ff",font=("Helvetica", 10, "bold"),width=40,command=lambda: preview_btn_click(path,tree,error_label))
     preview_btn.pack(anchor='center',padx=20, pady=10)
 
 
-    delete_manually_btn = tk.Button(frame3, text="Delete", bg="#f0f0f0", fg="#ff0000",font=("Helvetica", 10, "bold"),width=40,command=lambda: delete_selected_files(path,tree,"large"))
+    delete_manually_btn = tk.Button(frame3, text="Delete", bg="#f0f0f0", fg="#ff0000",font=("Helvetica", 10, "bold"),width=40,command=lambda: delete_selected_files(path,tree,"large",error_label))
     delete_manually_btn.pack(anchor='center',padx=20, pady=10)
 
     frame3.pack(anchor='center',padx=20, pady=10)
@@ -340,13 +344,7 @@ def show_filter_by_filetype_page(path,filetype,files_dict):
         show_insights_page(path)
         frames["filter_by_filetype"].destroy()
     
-    def preview_btn_click():
-        selected_item = tree.selection()
-        if selected_item:
-            selected_row = tree.item(selected_item)
-            selected_path = selected_row['values'][0]  # Assuming the path is in the first column 'fpath'
-            selected_path = os.path.join(path,selected_path)
-            preview_file(selected_path)
+
     
 
     frame = tk.Frame(root, bg="#93a8f5")
@@ -398,11 +396,11 @@ def show_filter_by_filetype_page(path,filetype,files_dict):
     select_all_btn = tk.Button(frame3, textvariable=select_string_var, bg="#f0f0f0", fg="#000000",font=("Helvetica", 10, "bold"),width=40,command=lambda: select_all_rows(tree,select_string_var))
     select_all_btn.pack(anchor='center',padx=20, pady=10)
 
-    preview_btn = tk.Button(frame3, text="Preview", bg="#f0f0f0", fg="#0000ff",font=("Helvetica", 10, "bold"),width=40,command=lambda: preview_btn_click())
+    preview_btn = tk.Button(frame3, text="Preview", bg="#f0f0f0", fg="#0000ff",font=("Helvetica", 10, "bold"),width=40,command=lambda: preview_btn_click(path,tree,error_label))
     preview_btn.pack(anchor='center',padx=20, pady=10)
 
 
-    delete_manually_btn = tk.Button(frame3, text="Delete", bg="#f0f0f0", fg="#ff0000",font=("Helvetica", 10, "bold"),width=40,command=lambda: delete_selected_files(path,tree,"filetype"))
+    delete_manually_btn = tk.Button(frame3, text="Delete", bg="#f0f0f0", fg="#ff0000",font=("Helvetica", 10, "bold"),width=40,command=lambda: delete_selected_files(path,tree,"filetype",error_label))
     delete_manually_btn.pack(anchor='center',padx=20, pady=10)
 
     frame3.pack(anchor='center',padx=20, pady=10)
@@ -431,15 +429,6 @@ def show_filter_by_extension_page(path,ext):
         show_insights_page(path)
         frames["filter_by_extension"].destroy()
     
-    
-    
-    def preview_btn_click():
-        selected_item = tree.selection()
-        if selected_item:
-            selected_row = tree.item(selected_item)
-            selected_path = selected_row['values'][0]  # Assuming the path is in the first column 'fpath'
-            selected_path = os.path.join(path,selected_path)
-            preview_file(selected_path)
     
 
     frame = tk.Frame(root, bg="#93a8f5")
@@ -492,11 +481,11 @@ def show_filter_by_extension_page(path,ext):
     select_all_btn = tk.Button(frame3, textvariable=select_string_var, bg="#f0f0f0", fg="#000000",font=("Helvetica", 10, "bold"),width=40,command=lambda: select_all_rows(tree,select_string_var))
     select_all_btn.pack(anchor='center',padx=20, pady=10)
 
-    preview_btn = tk.Button(frame3, text="Preview", bg="#f0f0f0", fg="#0000ff",font=("Helvetica", 10, "bold"),width=40,command=lambda: preview_btn_click())
+    preview_btn = tk.Button(frame3, text="Preview", bg="#f0f0f0", fg="#0000ff",font=("Helvetica", 10, "bold"),width=40,command=lambda: preview_btn_click(path,tree,error_label))
     preview_btn.pack(anchor='center',padx=20, pady=10)
 
 
-    delete_manually_btn = tk.Button(frame3, text="Delete", bg="#f0f0f0", fg="#ff0000",font=("Helvetica", 10, "bold"),width=40,command=lambda: delete_selected_files(path,tree,"extension"))
+    delete_manually_btn = tk.Button(frame3, text="Delete", bg="#f0f0f0", fg="#ff0000",font=("Helvetica", 10, "bold"),width=40,command=lambda: delete_selected_files(path,tree,"extension",error_label))
     delete_manually_btn.pack(anchor='center',padx=20, pady=10)
 
     frame3.pack(anchor='center',padx=20, pady=10)
