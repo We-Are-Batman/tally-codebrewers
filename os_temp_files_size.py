@@ -86,9 +86,9 @@ def get_temp_files_info():
 
     return temp_files_info, total_size
 
-if __name__ == "__main__":
-    file_type,size1 = get_temp_files_info()
-    for extension,size2 in file_type.items():
-        size3 = total_size = float("{:.2f}".format(size2 / (1024.0**2)))
-        print(extension,size3)
-    print(float("{:.2f}".format(size1 / (1024.0**2))))
+# if __name__ == "__main__":
+#     file_type,size1 = get_temp_files_info()
+#     for extension,size2 in file_type.items():
+#         size3 = total_size = float("{:.2f}".format(size2 / (1024.0**2)))
+#         print(extension,size3)
+#     print(float("{:.2f}".format(size1 / (1024.0**2))))
