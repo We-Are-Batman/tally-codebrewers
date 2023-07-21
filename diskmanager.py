@@ -19,12 +19,15 @@ from duplicate_files import automaticDeletion
 from os_temp_files_size import get_temp_files_info
 from file_deletion import delete_bin_contents
 from add_list_to_zip import create_zip
+from scheduled_scanning import *
 
 extensions = {}
 
 # Read from JSON file into a dictionary
 with open('file_association.json') as json_file:
     extensions = json.load(json_file)
+
+
 
 def validate_path(path):
     if os.path.isdir(path):
@@ -39,6 +42,18 @@ def validate_threshold(path,threshold,error_label):
     elif threshold.isnumeric():
         error_label.config(text="")
         show_large_files_page(path,threshold)
+    else:
+        error_label.config(text="Please enter a valid threshold.")
+
+def validate_days_threshold(path,days_threshold,error_label):
+    if days_threshold=="":
+        error_label.config(text="Please enter a valid threshold.")
+    elif days_threshold.isnumeric():
+        if int(days_threshold) < 0:
+            error_label.config(text="Please enter a valid threshold.")
+        else:
+            error_label.config(text="")
+            show_infreq_files_page(path,days_threshold)
     else:
         error_label.config(text="Please enter a valid threshold.")
 
@@ -117,6 +132,115 @@ def on_close():
         delete_bin_contents()
     root.destroy()
 
+
+def show_infreq_files_page(path,threshold=5):
+    def go_back():
+        show_insights_page(path)
+        frames["infreq_files"].destroy()
+    
+    def archive_files():
+        confirm = messagebox.askyesno("Archive Files", "The selected files will be deletd and made into an archive?")
+        if confirm:
+            selected_items = tree.selection()
+            if len(selected_items) == 0:
+                error_label.config(text="Please select a file to archive.")
+                return
+            paths_to_zip = []
+            for item in selected_items:
+                selected_row = tree.item(item)
+                selected_path = selected_row['values'][0]  
+                selected_path = os.path.join(path,selected_path)
+                paths_to_zip.append(selected_path)
+            create_zip(paths_to_zip,path)
+            delete_files_multithread(paths_to_zip)
+            messagebox.showinfo("Success", "Files Archived Successfully")
+            show_infreq_files_page(path)
+    
+    frame = tk.Frame(root, bg="#93a8f5")
+
+    frame1 = tk.Frame(frame, bg="#93a8f5")
+
+    error_label = tk.Label(frame1, text="", fg="red", bg="#93a8f5")
+    error_label.pack(anchor='center',padx=20, pady=10)
+
+    back_btn = tk.Button(frame1, text="Back", bg="#f0f0f0", fg="#000000", font=("Helvetica", 10, "bold"), width=10, command=go_back)
+    back_btn.pack(anchor='center',padx=20, pady=10)
+
+    get_threshold_entry = ttk.Entry(frame1, width=20, font=("Helvetica", 10, "bold"))
+    get_threshold_entry.pack(anchor='center',padx=20, pady=10,side="left")
+
+    set_threshold_btn = tk.Button(frame1, text="Set Threshold in Days", bg="#f0f0f0", fg="#000000", font=("Helvetica", 10, "bold"), width=20,command=lambda: validate_days_threshold(path,get_threshold_entry.get(),error_label))
+    set_threshold_btn.pack(anchor='center',padx=20, pady=10,side="right")
+
+    frame1.pack(anchor='center',padx=20, pady=10)
+
+    s.configure("Treeview.Heading", foreground='blue', font=("Helvetica", 10, "bold"))
+
+    frame2= tk.Frame(frame, bg="#93a8f5")
+
+    help_label = tk.Label(frame2, text="Use Ctrl + Left Click to select multiple files", bg="#93a8f5", font=("Helvetica", 10))
+    help_label.pack(anchor='w',padx=20, pady=10)
+
+    tree = ttk.Treeview(frame2,height=10)
+    vsb = Scrollbar(frame2, orient="vertical", command=tree.yview)
+    tree.configure(yscrollcommand=vsb.set)
+    tree["columns"]=("fpath","days")
+    tree["show"]="headings"
+
+    tree.column("fpath",minwidth=100, anchor="w")
+    tree.column("days",minwidth=100, anchor=tk.CENTER)
+    tree.heading("fpath", text="File Path",anchor=tk.CENTER)
+    tree.heading("days", text="Last Used",anchor=tk.CENTER)
+    tree.pack(side='left',padx=20, pady=10)
+
+    vsb.pack(side="right", fill="y")
+
+    threshold = int(threshold)
+
+    frame2.pack(anchor='center',padx=20, pady=10)
+
+    
+
+    frame3 = tk.Frame(frame, bg="#93a8f5")
+
+    select_string_var = tk.StringVar(value="Select All Rows")
+
+    select_all_btn = tk.Button(frame3, textvariable=select_string_var, bg="#f0f0f0", fg="#000000",font=("Helvetica", 10, "bold"),width=40,command=lambda: select_all_rows(tree,select_string_var))
+    select_all_btn.pack(anchor='center',padx=20, pady=10)
+
+    preview_btn = tk.Button(frame3, text="Preview", bg="#f0f0f0", fg="#0000ff",font=("Helvetica", 10, "bold"),width=40,command=lambda: preview_btn_click(path,tree,error_label))
+    preview_btn.pack(anchor='center',padx=20, pady=10)
+
+    archive_btn = tk.Button(frame3, text="Archive Selected Files", bg="#f0f0f0", fg="#0000ff",font=("Helvetica", 10, "bold"),width=40,command=archive_files)
+    archive_btn.pack(anchor='center',padx=20, pady=10)
+
+    delete_manually_btn = tk.Button(frame3, text="Delete", bg="#f0f0f0", fg="#ff0000",font=("Helvetica", 10, "bold"),width=40,command=lambda: delete_selected_files(path,tree,"large",error_label))
+    delete_manually_btn.pack(anchor='center',padx=20, pady=10)
+
+    frame3.pack(anchor='center',padx=20, pady=10)
+
+    files = identify_least_frequently_accessed_files(path,threshold)
+
+    print(len(files))
+
+    for filepath,days in files:
+        days = int(days)
+        days = f"{days} days"
+        print(filepath,days)
+        tree.insert("", tk.END, values=(filepath,days))
+
+    for f in frames.values():
+        f.pack_forget()
+    
+    frame.pack(anchor='center',padx=20, pady=10)
+
+    frames["infreq_files"] = frame
+    frames["infreq_files_1"] = frame1
+    frames["infreq_files_2"] = frame2
+    frames["infreq_files_3"] = frame3
+
+
+    
 
 def show_duplicate_files_page(path):
 
@@ -611,6 +735,9 @@ def show_insights_page(path):
     id_large_files_btn = tk.Button(insights_frame, text="See All Files", bg="#f0f0f0", fg="#000000", font=("Helvetica", 10, "bold"), width=40,command=lambda: show_large_files_page(path))
     id_large_files_btn.pack(anchor='center',padx=20, pady=10)
 
+    get_infreq_files_btn = tk.Button(insights_frame, text="See Infrequently Used Files", bg="#f0f0f0", fg="#000000", font=("Helvetica", 10, "bold"), width=40,command=lambda: show_infreq_files_page(path))
+    get_infreq_files_btn.pack(anchor='center',padx=20, pady=10)
+
     frame1 = tk.Frame(insights_frame, bg="#93a8f5")
     #add a combo box to select the file type and add a btn to its right
     select_filetype_combo = ttk.Combobox(frame1, width=20, font=("Helvetica", 10, "bold"))
@@ -688,7 +815,6 @@ if __name__ == "__main__":
         row_count += 1
     
     os_temp_var = tk.StringVar(value="")
-
         
 
     def process_temp_files():
@@ -700,7 +826,7 @@ if __name__ == "__main__":
     
     process_temp_files()
 
-    os_temp_label = tk.Button(home_frame, textvariable=os_temp_var, bg="#f0f0f0", fg="#000000", font=("Helvetica", 10, "bold"), width=40)
+    os_temp_label = tk.Button(home_frame, textvariable=os_temp_var, bg="#f0f0f0", fg="#000000", font=("Helvetica", 10, "bold"), width=40,)
     os_temp_label.pack(anchor='center',padx=20, pady=10)
 
     input_path_label = tk.Label(home_frame, text="Enter Path", bg="#93a8f5", font=("Helvetica", 10, "bold"), width=40)

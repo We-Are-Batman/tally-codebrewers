@@ -131,7 +131,7 @@ def identify_least_frequently_accessed_files(folder_path, days_threshold):
             time_difference = current_time - last_access_time
 
             if time_difference >= days_threshold_seconds:
-                least_frequent_files.append(file_path)
+                least_frequent_files.append((file_path, time_difference / (24 * 60 * 60)))
 
     return least_frequent_files
 
