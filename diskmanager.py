@@ -18,6 +18,7 @@ from preview_file import preview_file
 from duplicate_files import automaticDeletion
 from os_temp_files_size import get_temp_files_info
 from file_deletion import delete_bin_contents
+from add_list_to_zip import create_zip
 
 extensions = {}
 
@@ -107,10 +108,13 @@ def delete_auto_selected_files(path, tree,error_label):
 
 def empty_recycle_bin():
     delete_bin_contents()
+    messagebox.showinfo("Success", "Recycle Bin Emptied Successfully")
     show_homepage()
 
 def on_close():
-    delete_bin_contents()
+    confirmed = messagebox.askyesno("Exit", "Do you want to empty the Bin before exiting?")
+    if confirmed:
+        delete_bin_contents()
     root.destroy()
 
 
@@ -257,6 +261,26 @@ def show_large_files_page(path,threshold=0.0,extension="*"):
     def go_back():
         show_insights_page(path)
         frames["large_files"].destroy()
+
+    
+    def archive_files():
+        confirm = messagebox.askyesno("Archive Files", "The selected files will be deletd and made into an archive?")
+        if confirm:
+            selected_items = tree.selection()
+            if len(selected_items) == 0:
+                error_label.config(text="Please select a file to archive.")
+                return
+            paths_to_zip = []
+            for item in selected_items:
+                selected_row = tree.item(item)
+                selected_path = selected_row['values'][0]  
+                selected_path = os.path.join(path,selected_path)
+                paths_to_zip.append(selected_path)
+            create_zip(paths_to_zip,path)
+            delete_files_multithread(paths_to_zip)
+            messagebox.showinfo("Success", "Files Archived Successfully")
+            show_large_files_page(path)
+        
     
 
 
@@ -315,6 +339,8 @@ def show_large_files_page(path,threshold=0.0,extension="*"):
     preview_btn = tk.Button(frame3, text="Preview", bg="#f0f0f0", fg="#0000ff",font=("Helvetica", 10, "bold"),width=40,command=lambda: preview_btn_click(path,tree,error_label))
     preview_btn.pack(anchor='center',padx=20, pady=10)
 
+    archive_btn = tk.Button(frame3, text="Archive Selected Files", bg="#f0f0f0", fg="#0000ff",font=("Helvetica", 10, "bold"),width=40,command=archive_files)
+    archive_btn.pack(anchor='center',padx=20, pady=10)
 
     delete_manually_btn = tk.Button(frame3, text="Delete", bg="#f0f0f0", fg="#ff0000",font=("Helvetica", 10, "bold"),width=40,command=lambda: delete_selected_files(path,tree,"large",error_label))
     delete_manually_btn.pack(anchor='center',padx=20, pady=10)
