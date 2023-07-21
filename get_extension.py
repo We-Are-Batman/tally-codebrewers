@@ -5,6 +5,7 @@ def extract_extension_from_file_type(file_type):
     # Regular expression to extract the extension from file type
     extension_pattern = r'(?i)\b(jpeg|png|gif|bmp|ico|tiff|webp|pdf|zip|mp3|ogg|wav|webm|mp4|exe|elf|7z|gz|bz2|rar|txt|sh)\b'
     match = re.search(extension_pattern, file_type)
+    # print(match)
     return f".{match.group(1).lower()}" if match else None
 
 def identify_file_extension(file_path):

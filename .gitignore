@@ -2,3 +2,5 @@ stest.py
 __pycache__/
 dump
 dump/
+__pycache__/
+dump/
