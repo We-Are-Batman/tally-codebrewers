@@ -7,6 +7,7 @@ import wmi
 import psutil
 import shutil
 import datetime
+from add_list_to_zip import create_zip
 folder_path=r"D:\University"
 
 
@@ -31,7 +32,7 @@ def send_old_files_to_archive(file_paths, archive_location, days_threshold):
 
         # Zip the files in the temporary folder
         archive_name = os.path.join(archive_location, f"archive_{datetime.now().strftime('%Y%m%d%H%M%S')}.zip")
-        zip_files(old_files, archive_name)
+        create_zip(old_files, archive_name)
 
         # Remove the temporary folder after zipping
         shutil.rmtree(temp_folder)
@@ -145,7 +146,7 @@ def generate_report(folder_path):
     # duplicate_files = find_duplicate_files(folder_path)
 
     least_frequent_files = identify_least_frequently_accessed_files(folder_path, 90)  # Example days threshold: 90 days
-    
+
     list.append(disk_space_usage)
     list.append(large_files)
     list.append(least_frequent_files)
@@ -185,6 +186,7 @@ def generate_report(folder_path):
 def scan_and_manage_disk_space():
     print("Running disk space scanning and management...")
     generate_report(folder_path)
+    send_old_files_to_archive()
     # Your disk space scanning and management functions go here
 
 def get_scan_interval_from_user():
