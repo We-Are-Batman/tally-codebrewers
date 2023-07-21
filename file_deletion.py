@@ -116,8 +116,8 @@ def delete_bin_contents(folder_path=deleted_files_path):
         print(f"An error occurred while deleting contents in {folder_path}: {e}")
 
 
-if __name__ == "__main__":
-    # directory = r"C:\Users\kabir\OneDrive\Desktop\testfile"
-    # paths_to_delete = [os.path.join(directory, file) for file in os.listdir(directory)]
-    # delete_files_multithread(paths_to_delete)
-    delete_bin_contents()
+# if __name__ == "__main__":
+#     # directory = r"C:\Users\kabir\OneDrive\Desktop\testfile"
+#     # paths_to_delete = [os.path.join(directory, file) for file in os.listdir(directory)]
+#     # delete_files_multithread(paths_to_delete)
+#     delete_bin_contents()
