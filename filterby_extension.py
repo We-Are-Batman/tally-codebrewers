@@ -1,23 +1,19 @@
-import tkinter as tk
-from tkinter import ttk
 import concurrent.futures
 import os
 import json
 
 extensions = {}
-
-path = "C:\\Users\\adnan\\OneDrive\\Pictures\\Camera Roll"
-filetype = "video"
-ext = ".jpg"
-
 # Read from JSON file into a dictionary
 with open('file_association.json') as json_file:
     extensions = json.load(json_file)
 
 
 def filter_files_by_extension(root_path, ext):
+    if len(ext) < 1:
+        return []
     found_files = []
-
+    if ext[0] != '.':
+        ext = '.' + ext
     def filter_by_ext(dir_path, ext):
         file_list = []
         for _, _, files in os.walk(dir_path):
@@ -27,8 +23,8 @@ def filter_files_by_extension(root_path, ext):
                 if len(file_extension) < 1:
                     continue
                 if file_extension == ext:
-                    print(filename)
-                    file_list.append(filename)
+                    size = os.stat(os.path.join(dir_path, filename)).st_size
+                    file_list.append((filename, size))
 
         return file_list
 
@@ -61,8 +57,3 @@ def filter_files_by_extension(root_path, ext):
         return found_files
 
 
-# Call the function with the desired path and filetype
-files = filter_files_by_extension(path, ext)
-
-for file in files:
-    print(file)

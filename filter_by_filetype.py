@@ -1,13 +1,8 @@
-import tkinter as tk
-from tkinter import ttk
 import concurrent.futures
 import os
 import json
 
 extensions = {}
-
-path = r"C:\Users\adnan\OneDrive\Pictures"
-filetype = "image"
 
 # Read from JSON file into a dictionary
 with open('file_association.json') as json_file:
@@ -31,8 +26,8 @@ def filter_files_by_filetype(root_path, filetype):
                     actual_type = extensions[file_extension]
 
                 if actual_type == filetype:
-                    print(filename)
-                    file_list.append(filename)
+                    size = os.stat(os.path.join(dir_path, filename)).st_size
+                    file_list.append((filename, size))
 
         return file_list
 
@@ -65,10 +60,3 @@ def filter_files_by_filetype(root_path, filetype):
                         f"An error occurred while searching in {directory}: {e}")
         return found_files
 
-
-# Call the function with the desired path and filetype
-files = filter_files_by_filetype(path, filetype)
-
-# Print the results
-for file in files:
-    print(file)
