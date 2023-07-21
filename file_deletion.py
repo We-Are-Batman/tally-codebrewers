@@ -6,9 +6,21 @@ import shutil
 # load_dotenv()
 
 # deleted_files_path=os.getenv(DELETION_PATH)
-deleted_files_path=r"C:\Users\kabir\OneDrive\Desktop\recyclebin"
+deleted_files_path=r"C:\Users\adnan\OneDrive\Desktop\recyclebin"
+
+
+def ensure_folder_exists(folder_path):
+    # Check if the folder exists
+    if not os.path.exists(folder_path):
+        try:
+            os.makedirs(folder_path)
+            print(f"Folder created: {folder_path}")
+        except OSError as e:
+            # Handle any errors that may occur during folder creation
+            print(f"Error creating folder: {e}")
 
 def delete_file(source_file_path):
+    ensure_folder_exists(deleted_files_path);
     try:
     # Move the file from the source path to the destination path
         shutil.move(source_file_path, deleted_files_path)

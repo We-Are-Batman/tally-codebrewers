@@ -33,9 +33,9 @@ def merge_text_files(file1_path, file2_path, output_file_path):
         print(f"Error merging files: {e}")
 
 if __name__ == "__main__":
-    file1_path = r"C:\Users\kabir\OneDrive\Desktop\testfile\mergetestfile1.txt"
-    file2_path = r"C:\Users\kabir\OneDrive\Desktop\testfile\mergetestfile2.txt"
-    output_file_path = r"C:\Users\kabir\OneDrive\Desktop\testfile\merged.txt"
+    file1_path = r"C:\Users\adnan\Downloads\testing\mergetestfile1.txt"
+    file2_path = r"C:\Users\adnan\Downloads\testing\mergetestfile2.txt"
+    output_file_path = r"C:\Users\adnan\Downloads\testing\merged.txt"
 
     merge_text_files(file1_path, file2_path, output_file_path)
 

@@ -83,7 +83,3 @@ def filter_files_by_filetype(root_path, filetype):
                         f"An error occurred while searching in {directory}: {e}")
         
     return found_files
-
-# files = filter_files_by_filetype("C:\\Users\\ACER\\Documents","documents")
-# for f in files:
-#     print(f)

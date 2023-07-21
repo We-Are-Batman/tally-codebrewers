@@ -56,7 +56,7 @@ def get_totalsize_of_filetype(root_path):
                 file_stats = os.stat(file_path)
                 file_extension = identify_file_extension(file_path)
                 # print(d,file_extension)
-                print(file_extension)
+                
                 if len(file_extension) < 1:
                     continue
                 if file_extension not in extensions:
@@ -93,7 +93,3 @@ def get_totalsize_of_filetype(root_path):
 
 
 
-# files,size1 = get_totalsize_of_filetype("E:\\")
-# for type,size in files.items():
-#     print(type,size)
-# print(size1)

@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 from tkinter import Scrollbar
+from tkinter import filedialog
 import win32api
 import psutil
 import json
@@ -11,7 +12,10 @@ from filterby_extension import filter_files_by_extension
 from filter_by_filetype import filter_files_by_filetype
 from get_large_files import get_large_files
 from duplicate_files import *
+from file_deletion import delete_files_multithread
 from preview_file import preview_file
+from duplicate_files import automaticDeletion
+from os_temp_files_size import get_temp_files_info
 
 extensions = {}
 
@@ -26,6 +30,36 @@ def validate_path(path):
     else:
         error_label.config(text="Invalid path. Please enter a valid directory.")
 
+
+def delete_selected_files(path, tree,page):
+    selected_items = tree.selection()
+    paths_to_delete = []
+    for item in selected_items:
+        selected_row = tree.item(item)
+        selected_path = selected_row['values'][0]  
+        selected_path = os.path.join(path,selected_path)
+        paths_to_delete.append(selected_path)
+    delete_files_multithread(paths_to_delete)
+    if page=="duplicate":
+        show_duplicate_files_page(path)
+    elif page =="large":
+        show_large_files_page(path)
+    elif page=="filetype":
+        show_filter_by_filetype_page(path)
+    elif page=="extension":
+        show_duplicate_files_page(path)
+
+def delete_auto_selected_files(path, tree):
+    #get all tree items
+    items = tree.get_children()
+    paths_to_delete = []
+    for item in items:
+        selected_row = tree.item(item)
+        selected_path = selected_row['values'][0]  
+        selected_path = os.path.join(path,selected_path)
+        paths_to_delete.append(selected_path)
+    automaticDeletion(paths_to_delete)
+    show_duplicate_files_page(path)
 
 def show_duplicate_files_page(path):
 
@@ -129,10 +163,10 @@ def show_duplicate_files_page(path):
     preview_btn = tk.Button(frame3, text="Preview", bg="#f0f0f0", fg="#0000ff",font=("Helvetica", 10, "bold"),width=40,command=lambda: preview_btn_click())
     preview_btn.pack(anchor='center',padx=20, pady=10)
 
-    delete_auto_btn = tk.Button(frame3, text="Delete Automatically", bg="#f0f0f0", fg="#ff0000",font=("Helvetica", 10, "bold"),width=40)
+    delete_auto_btn = tk.Button(frame3, text="Delete Automatically", bg="#f0f0f0", fg="#ff0000",font=("Helvetica", 10, "bold"),width=40,command=lambda: delete_auto_selected_files(path,tree))
     delete_auto_btn.pack(anchor='center',padx=20, pady=10)
 
-    delete_manually_btn = tk.Button(frame3, text="Delete Manually", bg="#f0f0f0", fg="#ff0000",font=("Helvetica", 10, "bold"),width=40)
+    delete_manually_btn = tk.Button(frame3, text="Delete Manually", bg="#f0f0f0", fg="#ff0000",font=("Helvetica", 10, "bold"),width=40,command=lambda: delete_selected_files(path,tree,"duplicate"))
     delete_manually_btn.pack(anchor='center',padx=20, pady=10)
 
     frame3.pack(anchor='center',padx=20, pady=10)
@@ -167,11 +201,19 @@ def show_duplicate_files_page(path):
 
 
 
-def show_large_files_page(path,threshold=4*1024.0**2,extension="*"):
+def show_large_files_page(path,threshold=4*1024.0,extension="*"):
 
     def go_back():
         show_insights_page(path)
         frames["large_files"].destroy()
+    
+    def preview_btn_click():
+        selected_item = tree.selection()
+        if selected_item:
+            selected_row = tree.item(selected_item)
+            selected_path = selected_row['values'][0]  # Assuming the path is in the first column 'fpath'
+            selected_path = os.path.join(path,selected_path)
+            preview_file(selected_path)
 
     frame = tk.Frame(root, bg="#93a8f5")
 
@@ -183,15 +225,17 @@ def show_large_files_page(path,threshold=4*1024.0**2,extension="*"):
     get_threshold_entry = ttk.Entry(frame1, width=20, font=("Helvetica", 10, "bold"))
     get_threshold_entry.pack(anchor='center',padx=20, pady=10,side="left")
 
-    set_threshold_btn = tk.Button(frame1, text="Set Threshold", bg="#f0f0f0", fg="#000000", font=("Helvetica", 10, "bold"), width=20,command=lambda: show_large_files_page(path,get_threshold_entry.get()))
+    set_threshold_btn = tk.Button(frame1, text="Set Threshold in KB", bg="#f0f0f0", fg="#000000", font=("Helvetica", 10, "bold"), width=20,command=lambda: show_large_files_page(path,get_threshold_entry.get()))
     set_threshold_btn.pack(anchor='center',padx=20, pady=10,side="right")
 
     frame1.pack(anchor='center',padx=20, pady=10)
 
     s.configure("Treeview.Heading", foreground='blue', font=("Helvetica", 10, "bold"))
 
-    tree = ttk.Treeview(frame,height=10)
-    vsb = Scrollbar(frame, orient="vertical", command=tree.yview)
+    frame2= tk.Frame(frame, bg="#93a8f5")
+
+    tree = ttk.Treeview(frame2,height=10)
+    vsb = Scrollbar(frame2, orient="vertical", command=tree.yview)
     tree.configure(yscrollcommand=vsb.set)
     tree["columns"]=("filename","size")
     tree["show"]="headings"
@@ -204,7 +248,23 @@ def show_large_files_page(path,threshold=4*1024.0**2,extension="*"):
 
     vsb.pack(side="right", fill="y")
     threshold = float(threshold)
+    threshold = threshold * 1024.0
+
+    frame2.pack(anchor='center',padx=20, pady=10)
+
     files = get_large_files(path, threshold, extension)
+
+    frame3 = tk.Frame(frame, bg="#93a8f5")
+
+    preview_btn = tk.Button(frame3, text="Preview", bg="#f0f0f0", fg="#0000ff",font=("Helvetica", 10, "bold"),width=40,command=lambda: preview_btn_click())
+    preview_btn.pack(anchor='center',padx=20, pady=10)
+
+
+    delete_manually_btn = tk.Button(frame3, text="Delete", bg="#f0f0f0", fg="#ff0000",font=("Helvetica", 10, "bold"),width=40,command=lambda: delete_selected_files(path,tree,"large"))
+    delete_manually_btn.pack(anchor='center',padx=20, pady=10)
+
+    frame3.pack(anchor='center',padx=20, pady=10)
+
 
     for size,file,_ in files:
         size = float("{:.2f}".format(size / (1024.0)))
@@ -228,6 +288,14 @@ def show_filter_by_filetype_page(path,filetype,files_dict):
         show_insights_page(path)
         frames["filter_by_filetype"].destroy()
     
+    def preview_btn_click():
+        selected_item = tree.selection()
+        if selected_item:
+            selected_row = tree.item(selected_item)
+            selected_path = selected_row['values'][0]  # Assuming the path is in the first column 'fpath'
+            selected_path = os.path.join(path,selected_path)
+            preview_file(selected_path)
+    
 
     frame = tk.Frame(root, bg="#93a8f5")
 
@@ -249,8 +317,11 @@ def show_filter_by_filetype_page(path,filetype,files_dict):
     frame1.pack(anchor='center',padx=20, pady=10)
 
     s.configure("Treeview.Heading", foreground='blue', font=("Helvetica", 10, "bold"))
-    tree = ttk.Treeview(frame,height=10)
-    vsb = Scrollbar(frame, orient="vertical", command=tree.yview)
+
+    frame2= tk.Frame(frame, bg="#93a8f5")
+
+    tree = ttk.Treeview(frame2,height=10)
+    vsb = Scrollbar(frame2, orient="vertical", command=tree.yview)
     tree.configure(yscrollcommand=vsb.set)
     tree["columns"]=("filename","size")
     tree["show"]="headings"
@@ -263,7 +334,18 @@ def show_filter_by_filetype_page(path,filetype,files_dict):
     vsb.pack(side="right", fill="y")
     files = filter_files_by_filetype(path, filetype)
 
-    
+    frame2.pack(anchor='center',padx=20, pady=10)
+
+    frame3 = tk.Frame(frame, bg="#93a8f5")
+
+    preview_btn = tk.Button(frame3, text="Preview", bg="#f0f0f0", fg="#0000ff",font=("Helvetica", 10, "bold"),width=40,command=lambda: preview_btn_click())
+    preview_btn.pack(anchor='center',padx=20, pady=10)
+
+
+    delete_manually_btn = tk.Button(frame3, text="Delete", bg="#f0f0f0", fg="#ff0000",font=("Helvetica", 10, "bold"),width=40,command=lambda: delete_selected_files(path,tree,"filetype"))
+    delete_manually_btn.pack(anchor='center',padx=20, pady=10)
+
+    frame3.pack(anchor='center',padx=20, pady=10)
 
     for file,size in files:
         size = float("{:.2f}".format(size / (1024.0)))
@@ -279,6 +361,8 @@ def show_filter_by_filetype_page(path,filetype,files_dict):
     frame.pack(anchor='center',padx=20, pady=10)
     frames["filter_by_filetype"] = frame
     frames["filter_by_filter_by_filetype_1"] = frame1
+    frames["filter_by_filter_by_filetype_2"] = frame2
+    frames["filter_by_filter_by_filetype_3"] = frame3
 
 def show_filter_by_extension_page(path,ext):
 
@@ -286,6 +370,14 @@ def show_filter_by_extension_page(path,ext):
     def go_back():
         show_insights_page(path)
         frames["filter_by_extension"].destroy()
+    
+    def preview_btn_click():
+        selected_item = tree.selection()
+        if selected_item:
+            selected_row = tree.item(selected_item)
+            selected_path = selected_row['values'][0]  # Assuming the path is in the first column 'fpath'
+            selected_path = os.path.join(path,selected_path)
+            preview_file(selected_path)
     
 
     frame = tk.Frame(root, bg="#93a8f5")
@@ -305,8 +397,11 @@ def show_filter_by_extension_page(path,ext):
    
     frame1.pack(anchor='center',padx=20, pady=10)
     s.configure("Treeview.Heading", foreground='blue', font=("Helvetica", 10, "bold"))
-    tree = ttk.Treeview(frame,height=10)
-    vsb = Scrollbar(frame, orient="vertical", command=tree.yview)
+
+    frame2= tk.Frame(frame, bg="#93a8f5")
+
+    tree = ttk.Treeview(frame2,height=10)
+    vsb = Scrollbar(frame2, orient="vertical", command=tree.yview)
     tree.configure(yscrollcommand=vsb.set)
     tree["columns"]=("filename","size")
     tree["show"]="headings"
@@ -317,9 +412,21 @@ def show_filter_by_extension_page(path,ext):
     tree.heading("size", text="Size",anchor=tk.CENTER)
     tree.pack(side='left',padx=20, pady=10)
     vsb.pack(side="right", fill="y")
+
+    frame2.pack(anchor='center',padx=20, pady=10)
+
     files = filter_files_by_extension(path,ext)
 
-    
+    frame3 = tk.Frame(frame, bg="#93a8f5")
+
+    preview_btn = tk.Button(frame3, text="Preview", bg="#f0f0f0", fg="#0000ff",font=("Helvetica", 10, "bold"),width=40,command=lambda: preview_btn_click())
+    preview_btn.pack(anchor='center',padx=20, pady=10)
+
+
+    delete_manually_btn = tk.Button(frame3, text="Delete", bg="#f0f0f0", fg="#ff0000",font=("Helvetica", 10, "bold"),width=40,command=lambda: delete_selected_files(path,tree,"extension"))
+    delete_manually_btn.pack(anchor='center',padx=20, pady=10)
+
+    frame3.pack(anchor='center',padx=20, pady=10)
 
     for file,size in files:
         size = float("{:.2f}".format(size / (1024.0)))
@@ -336,6 +443,8 @@ def show_filter_by_extension_page(path,ext):
     frame.pack(anchor='center',padx=20, pady=10)
     frames["filter_by_extension"] = frame
     frames["filter_by_extension_1"] = frame1
+    frames["filter_by_extension_2"] = frame2
+    frames["filter_by_extension_3"] = frame3
 
 
 def show_disk_usage(path,frame,row_count):
@@ -452,13 +561,21 @@ def show_homepage():
     
     frames["home"].pack(anchor='center',padx=20, pady=10)
 
+def browse_directory():
+        selected_dir = filedialog.askdirectory()
+        if selected_dir:
+            input_path_text.set(selected_dir)
+
 if __name__ == "__main__":
 
     path=""
 
     if len(sys.argv) == 2:
         path = sys.argv[1]
-        
+
+    print(path)
+    
+
     root = tk.Tk()
     root.title("Disk Space Manager")
     # root.geometry("600x400")  # Set the window size
@@ -478,6 +595,22 @@ if __name__ == "__main__":
     for drive in drives:
         show_disk_usage(drive, home_frame,row_count)
         row_count += 1
+    
+    os_temp_var = tk.StringVar(value="")
+
+        
+
+    def process_temp_files():
+        _, total_size = get_temp_files_info()
+        total_size = float("{:.2f}".format(total_size / (1024.0**3)))
+        total_size = f"{total_size} GB"
+        os_temp_var.set(f"OS Temp Files\nTotal Size : {total_size}")
+
+    
+    process_temp_files()
+
+    os_temp_label = tk.Button(home_frame, textvariable=os_temp_var, bg="#f0f0f0", fg="#000000", font=("Helvetica", 10, "bold"), width=40)
+    os_temp_label.pack(anchor='center',padx=20, pady=10)
 
     input_path_label = tk.Label(home_frame, text="Enter Path", bg="#93a8f5", font=("Helvetica", 10, "bold"), width=40)
     input_path_label.pack(anchor='center',padx=20, pady=10)
@@ -486,6 +619,10 @@ if __name__ == "__main__":
     input_path_text = tk.StringVar(value=path)
     input_path_entry = tk.Entry(home_frame, textvariable=input_path_text, width=50)
     input_path_entry.pack(anchor='center',padx=20, pady=10)
+    row_count += 1
+
+    browse_btn = tk.Button(home_frame, text="Browse", bg="#f0f0f0", fg="#000000", font=("Helvetica", 10, "bold"), width=40, command=browse_directory)
+    browse_btn.pack(anchor='center', padx=20, pady=10)
     row_count += 1
 
     get_insights_btn = tk.Button(home_frame, text="Get Insights", bg="#f0f0f0", fg="#000000", font=("Helvetica", 10, "bold"), width=40, command=lambda: validate_path(input_path_text.get()))
