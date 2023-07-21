@@ -30,7 +30,8 @@ def find_duplicate_files(directory):
         for filename in filenames:
             file_path = os.path.join(dirpath, filename)
             file_hash = get_file_hash(file_path)
-            file_hashes[file_hash].append(file_path)
+            size = os.path.getsize(file_path)
+            file_hashes[file_hash].append((file_path, size,filename))
 
     return {file_hash: paths for file_hash, paths in file_hashes.items() if len(paths) > 1}
 
@@ -258,5 +259,5 @@ def deleteDuplicateFiles(directory_path):
 
 
 
-directory_path = r"C:\Users\kabir\OneDrive\Desktop\testfile"
-deleteDuplicateFiles(directory_path)
+# directory_path = r"C:\Users\adnan\Downloads\testing"
+# deleteDuplicateFiles(directory_path)

@@ -10,6 +10,8 @@ from get_total_size_of_filetype import get_totalsize_of_filetype
 from filterby_extension import filter_files_by_extension
 from filter_by_filetype import filter_files_by_filetype
 from get_large_files import get_large_files
+from duplicate_files import *
+from preview_file import preview_file
 
 extensions = {}
 
@@ -23,6 +25,146 @@ def validate_path(path):
         show_insights_page(path)
     else:
         error_label.config(text="Invalid path. Please enter a valid directory.")
+
+
+def show_duplicate_files_page(path):
+
+    def go_back():
+        show_insights_page(path)
+        frames["duplicate_files"].destroy()
+
+    def preview_btn_click():
+        selected_item = tree.selection()
+        if selected_item:
+            selected_row = tree.item(selected_item)
+            selected_path = selected_row['values'][0]  # Assuming the path is in the first column 'fpath'
+            preview_file(selected_path)
+    
+    ind =0
+
+    def insert_in_tree():
+        nonlocal ind
+        nonlocal duplicate_files_len
+        page_number_var.set(f"Page {ind+1} of {duplicate_files_len}")
+        tree.delete(*tree.get_children())
+        if ind == 0:
+            previous_btn.configure(state="disabled")
+        else:
+            previous_btn.configure(state="normal")
+        if ind == duplicate_files_len-1:
+            next_btn.configure(state="disabled")
+        else:
+            next_btn.configure(state="normal")
+        for fpath,size,name in duplicate_files[ind]:
+            size = float("{:.2f}".format(size / (1024.0)))
+            if size < 1:
+                size = 1
+            size = int(size)
+            size = f"{size} KB"
+            tree.insert("", tk.END, values=(fpath,size,name))
+
+    def next():
+        nonlocal ind
+        ind += 1
+        insert_in_tree()
+    
+    def previous():
+        nonlocal ind
+        ind -= 1
+        insert_in_tree()
+
+    frame = tk.Frame(root, bg="#93a8f5")
+
+    frame1 = tk.Frame(frame, bg="#93a8f5")
+
+    title_label = tk.Label(frame1, text="Duplicate Files", bg="#93a8f5", font=("Helvetica", 10, "bold"), width=40)
+    title_label.pack(anchor='center',padx=20, pady=10)
+
+    back_btn = tk.Button(frame1, text="Back", bg="#f0f0f0", fg="#000000",font=("Helvetica", 10, "bold"),width=20,command=go_back)
+    back_btn.pack(anchor='center',padx=20, pady=10)
+
+    page_number_var = tk.StringVar(value="Page 1 of 1")
+    page_number_label = tk.Label(frame1, textvariable=page_number_var, bg="#93a8f5", font=("Helvetica", 10, "bold"), width=40)
+    page_number_label.pack(anchor='center',padx=20, pady=10)
+
+    help_label = tk.Label(frame1, text="Use Ctrl + Left Click to select multiple files", bg="#93a8f5", font=("Helvetica", 10))
+    help_label.pack(anchor='w',padx=20, pady=10)
+
+    s.configure("Treeview.Heading", foreground='blue', font=("Helvetica", 10, "bold"))
+
+    tree = ttk.Treeview(frame1,height=10)
+    vsb = Scrollbar(frame1, orient="vertical", command=tree.yview)
+    tree.configure(yscrollcommand=vsb.set)
+    tree["columns"]=("fpath","size","fname")
+    tree["show"]="headings"
+
+    tree.column("fpath",minwidth=100,width=300, anchor="w")
+    tree.column("size",minwidth=100, anchor=tk.CENTER)
+    tree.column("fname",minwidth=100, anchor=tk.CENTER)
+    tree.heading("fpath", text="Path",anchor=tk.CENTER)
+    tree.heading("size", text="Size",anchor=tk.CENTER)
+    tree.heading("fname", text="File Name",anchor=tk.CENTER)
+
+    tree.pack(side='left',padx=20, pady=10)
+
+    vsb.pack(side="right", fill="y")
+
+    
+    frame1.pack(anchor='center',padx=20, pady=10)
+
+    frame2 = tk.Frame(frame, bg="#93a8f5")
+
+    previous_btn = tk.Button(frame2, text="Previous", bg="#f0f0f0", fg="#000000",font=("Helvetica", 10, "bold"),width=20,command=previous)
+    previous_btn.pack(anchor='center',padx=20, pady=10,side="left")
+    previous_btn.configure(state="disabled")
+
+    next_btn = tk.Button(frame2, text="Next", bg="#f0f0f0", fg="#000000",font=("Helvetica", 10, "bold"),width=20,command=next)
+    next_btn.pack(anchor='center',padx=20, pady=10,side="right")
+    next_btn.configure(state="disabled")
+
+    frame2.pack(anchor='center',padx=20, pady=10)
+
+    frame3 = tk.Frame(frame, bg="#93a8f5")
+
+    preview_btn = tk.Button(frame3, text="Preview", bg="#f0f0f0", fg="#0000ff",font=("Helvetica", 10, "bold"),width=40,command=lambda: preview_btn_click())
+    preview_btn.pack(anchor='center',padx=20, pady=10)
+
+    delete_auto_btn = tk.Button(frame3, text="Delete Automatically", bg="#f0f0f0", fg="#ff0000",font=("Helvetica", 10, "bold"),width=40)
+    delete_auto_btn.pack(anchor='center',padx=20, pady=10)
+
+    delete_manually_btn = tk.Button(frame3, text="Delete Manually", bg="#f0f0f0", fg="#ff0000",font=("Helvetica", 10, "bold"),width=40)
+    delete_manually_btn.pack(anchor='center',padx=20, pady=10)
+
+    frame3.pack(anchor='center',padx=20, pady=10)
+
+    duplicate_files = find_duplicate_files(path)
+
+    #convert this to a list of lists
+    duplicate_files = list(duplicate_files.values())
+
+    duplicate_files_len = len(duplicate_files)
+
+    
+
+    if duplicate_files_len == 0:
+        tree.insert("", tk.END, values=("No files found","",""))
+    else:
+        insert_in_tree()
+
+
+    for f in frames.values():
+        f.pack_forget()
+    
+    frame.pack(anchor='center',padx=20, pady=10)
+
+    frames["duplicate_files"] = frame
+    frames["duplicate_files_1"] = frame1
+    frames["duplicate_files_2"] = frame2
+    frames["duplicate_files_3"] = frame3
+
+    
+        
+
 
 
 def show_large_files_page(path,threshold=4*1024.0**2,extension="*"):
@@ -263,7 +405,7 @@ def show_insights_page(path):
         percentage = f"{percentage} %"
         tree.insert("", tk.END, values=(file_type,tot,percentage))
 
-    detect_duplicate_btn = tk.Button(insights_frame, text="Detect Duplicates", bg="#f0f0f0", fg="#000000", font=("Helvetica", 10, "bold"), width=40)
+    detect_duplicate_btn = tk.Button(insights_frame, text="Detect Duplicates", bg="#f0f0f0", fg="#000000", font=("Helvetica", 10, "bold"), width=40,command=lambda: show_duplicate_files_page(path))
     detect_duplicate_btn.pack(anchor='center',padx=20, pady=10)
 
     id_large_files_btn = tk.Button(insights_frame, text="Identify Large Files", bg="#f0f0f0", fg="#000000", font=("Helvetica", 10, "bold"), width=40,command=lambda: show_large_files_page(path))
