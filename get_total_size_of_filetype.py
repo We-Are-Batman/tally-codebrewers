@@ -93,7 +93,3 @@ def get_totalsize_of_filetype(root_path):
 
 
 
-# files,size1 = get_totalsize_of_filetype("E:\\")
-# for type,size in files.items():
-#     print(type,size)
-# print(size1)
