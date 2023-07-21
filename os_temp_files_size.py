@@ -95,7 +95,4 @@ def get_temp_files_info():
 
     return temp_files_info, total_size
 
-# if __name__ == "__main__":
-#     file_type,size = get_temp_files_info()
-#     for extension,size in file_type.items():
-#         print(extension,size)
+

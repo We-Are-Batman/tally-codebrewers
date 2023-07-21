@@ -26,7 +26,6 @@ def get_totalsize_of_filetype_helper(root_path):
                     file_stats = os.stat(file_path)
                     # split_tup = os.path.splitext(filename,file_stats.st_size)
                     file_extension = identify_file_extension(file_path)
-                    print(file_extension)
                     # print(filename,file_extension)
                     if len(file_extension) < 1:
                         continue
@@ -60,7 +59,7 @@ def get_totalsize_of_filetype_helper(root_path):
                 file_stats = os.stat(file_path)
                 file_extension = identify_file_extension(file_path)
                 # print(d,file_extension)
-                print(file_extension)
+                
                 if len(file_extension) < 1:
                     continue
                 if file_extension not in extensions:
@@ -100,7 +99,3 @@ def get_totalsize_of_filetype(root_path):
     files = get_totalsize_of_filetype_helper(root_path)
     return files,sum(files.values())
 
-files,size = get_totalsize_of_filetype("C:\\Users\\ACER\Pictures\\Camera Roll\\")
-for type,size in files.items():
-    print(type,size)
-print(size)
