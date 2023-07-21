@@ -12,6 +12,7 @@ from filterby_extension import filter_files_by_extension
 from filter_by_filetype import filter_files_by_filetype
 from get_large_files import get_large_files
 from duplicate_files import *
+from file_deletion import delete_files_multithread
 from preview_file import preview_file
 from os_temp_files_size import get_temp_files_info
 
@@ -566,11 +567,13 @@ if __name__ == "__main__":
     
     os_temp_var = tk.StringVar(value="")
 
+        
+
     def process_temp_files():
         _, total_size = get_temp_files_info()
         total_size = float("{:.2f}".format(total_size / (1024.0**3)))
         total_size = f"{total_size} GB"
-        os_temp_var.set(f"Clear Temp Files\nTotal Size : {total_size}")
+        os_temp_var.set(f"OS Temp Files\nTotal Size : {total_size}")
 
     
     process_temp_files()
