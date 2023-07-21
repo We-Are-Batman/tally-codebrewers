@@ -4,10 +4,6 @@
 #Files with any one metadeta same- identify_similar_files(directory) --HELPER FN-identicalFilesbasedOnMetadata(directory_to_scan)
 #Delete duplicate files -deleteDuplicateFiles(directory_path)
 
-
-
-
-
 import os
 import hashlib
 from collections import defaultdict
@@ -30,7 +26,8 @@ def find_duplicate_files(directory):
         for filename in filenames:
             file_path = os.path.join(dirpath, filename)
             file_hash = get_file_hash(file_path)
-            file_hashes[file_hash].append(file_path)
+            size = os.path.getsize(file_path)
+            file_hashes[file_hash].append((file_path, size,filename))
 
     return {file_hash: paths for file_hash, paths in file_hashes.items() if len(paths) > 1}
 
@@ -256,7 +253,3 @@ def deleteDuplicateFiles(directory_path):
         elif choice==2:
             manualDeletion(duplicate_files)
 
-
-
-directory_path = r"C:\Users\kabir\OneDrive\Desktop\testfile"
-deleteDuplicateFiles(directory_path)
