@@ -6,7 +6,7 @@ import shutil
 # load_dotenv()
 
 # deleted_files_path=os.getenv(DELETION_PATH)
-deleted_files_path=r"C:\Users\kabir\OneDrive\Desktop\recyclebin"
+deleted_files_path=r"C:\Users\adnan\OneDrive\Desktop\recyclebin"
 
 
 def ensure_folder_exists(folder_path):
