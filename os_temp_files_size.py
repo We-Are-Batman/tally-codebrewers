@@ -35,8 +35,6 @@ def get_temp_files_info():
     total_size = 0
 
     def find_files(directory):
-        set = {}
-        size = 0
         for root, _, files in os.walk(directory):
             for file in files:
                 try:
@@ -44,20 +42,13 @@ def get_temp_files_info():
                     file_stats = os.stat(file_path)
                     file_size = file_stats.st_size
                     file_category = get_file_category(file_path)
-                    if set.get(file_category) == None:
-                        set[file_category] = 0
-                    set[file_category] += file_size
-                    size += file_size
+                    if temp_files_info.get(file_category) == None:
+                        temp_files_info[file_category] = 0
+                    temp_files_info[file_category] += file_size
+                    total_size += file_size
                 except:
                     pass
 
-        return set,size
-    
-    def process_directory(dir_path):
-        nonlocal total_size
-        set,size = find_files(dir_path)
-        temp_files_info.update(set)
-        total_size += size
 
     directories = []
     for d in os.listdir(temp_dir):
@@ -82,7 +73,7 @@ def get_temp_files_info():
     if num_threads > 0: 
         with concurrent.futures.ThreadPoolExecutor(max_workers=num_threads) as executor:
             future_to_directory = {executor.submit(
-                process_directory, directory): directory for directory in directories}
+                find_files, directory): directory for directory in directories}
 
             # Wait for all threads to finish
             for future in concurrent.futures.as_completed(future_to_directory):
@@ -95,7 +86,9 @@ def get_temp_files_info():
 
     return temp_files_info, total_size
 
-# if __name__ == "__main__":
-#     file_type,size = get_temp_files_info()
-#     for extension,size in file_type.items():
-#         print(extension,size)
+if __name__ == "__main__":
+    file_type,size1 = get_temp_files_info()
+    for extension,size2 in file_type.items():
+        size3 = total_size = float("{:.2f}".format(size2 / (1024.0**2)))
+        print(extension,size3)
+    print(float("{:.2f}".format(size1 / (1024.0**2))))

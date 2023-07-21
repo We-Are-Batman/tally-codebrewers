@@ -4,7 +4,8 @@ if "%~1"=="" (
     exit /b 1
 )
 
-set "python_script=C:\tally-codebrewers\diskmanager.py"
+
+set "python_script=F:\Sumanshu\proj\tally-codebrewers\diskmanager.py"
 set "path_arg=%~1"
 
 if not exist "%path_arg%" (
