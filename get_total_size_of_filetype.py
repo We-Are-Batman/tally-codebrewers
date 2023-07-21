@@ -24,7 +24,7 @@ def get_totalsize_of_filetype(root_path):
                     file_path = os.path.join(root, filename)
                     file_stats = os.stat(file_path)
                     split_tup = os.path.splitext(filename,file_stats.st_size)
-                    print(filename)
+                    # print(filename)
                     file_extension = split_tup[1]
                     if len(file_extension) < 1:
                         continue

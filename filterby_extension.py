@@ -74,8 +74,3 @@ def filter_files_by_extension(root_path, ext):
                         f"An error occurred while searching in {directory}: {e}")
     
     return found_files
-
-
-# files = filter_files_by_extension("C:\\Users\\ACER\\Documents","pdf")
-# for f in files:
-#     print(f)

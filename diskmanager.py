@@ -5,6 +5,7 @@ import win32api
 import psutil
 import json
 import os
+import sys
 from get_total_size_of_filetype import get_totalsize_of_filetype
 from filterby_extension import filter_files_by_extension
 from filter_by_filetype import filter_files_by_filetype
@@ -187,7 +188,7 @@ def show_filter_by_extension_page(path,ext):
         tree.insert("", tk.END, values=("No files found",""))
 
     for f in frames.values():
-        print(f)
+        (f)
         f.pack_forget()    
     
     frame.pack(anchor='center',padx=20, pady=10)
@@ -197,7 +198,7 @@ def show_filter_by_extension_page(path,ext):
 
 def show_disk_usage(path,frame,row_count):
     drive_name = path[:2]
-    print(path)
+    # print(path)
     obj_Disk = psutil.disk_usage(path)
     total_gb = float("{:.2f}".format(obj_Disk.total / (1024.0 ** 3)))
     used_gb = float("{:.2f}".format(obj_Disk.used / (1024.0 ** 3)))
@@ -206,7 +207,7 @@ def show_disk_usage(path,frame,row_count):
     
     path_info = f"Path: {path}\n Total: {total_gb} GB\nUsed: {used_gb} GB\nFree: {free_gb} GB\nFree %: {free_percent}"
 
-    print(path_info)
+    # print(path_info)
     
     # Add a disabled button to show disk usage
     drive_button = tk.Button(frame, text=path_info, bg="#f0f0f0", fg="#000000", font=("Helvetica", 10, "bold"), width=40)
@@ -311,6 +312,11 @@ def show_homepage():
 
 if __name__ == "__main__":
 
+    path=""
+
+    if len(sys.argv) == 2:
+        path = sys.argv[1]
+        
     root = tk.Tk()
     root.title("Disk Space Manager")
     # root.geometry("600x400")  # Set the window size
@@ -335,7 +341,7 @@ if __name__ == "__main__":
     input_path_label.pack(anchor='center',padx=20, pady=10)
     row_count += 1
 
-    input_path_text = tk.StringVar()
+    input_path_text = tk.StringVar(value=path)
     input_path_entry = tk.Entry(home_frame, textvariable=input_path_text, width=50)
     input_path_entry.pack(anchor='center',padx=20, pady=10)
     row_count += 1
