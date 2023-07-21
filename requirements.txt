@@ -1,0 +1,6 @@
+psutil==5.9.5
+python-magic==0.4.27
+python-magic-bin==0.4.14
+pywin32==306
+schedule==1.2.0
+WMI==1.5.1
