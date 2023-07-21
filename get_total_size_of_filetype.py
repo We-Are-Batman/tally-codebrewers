@@ -1,6 +1,7 @@
 import os
 import concurrent.futures
 import json
+from get_extension import identify_file_extension
 
 
 extensions = {}
@@ -9,6 +10,8 @@ extensions = {}
 
 with open('file_association.json') as json_file:
     extensions = json.load(json_file)
+
+
 
 
 def get_totalsize_of_filetype(root_path):
@@ -23,9 +26,9 @@ def get_totalsize_of_filetype(root_path):
                 try:
                     file_path = os.path.join(root, filename)
                     file_stats = os.stat(file_path)
-                    split_tup = os.path.splitext(filename,file_stats.st_size)
-                    print(filename)
-                    file_extension = split_tup[1]
+                    # split_tup = os.path.splitext(filename,file_stats.st_size)
+                    file_extension = identify_file_extension(file_path)
+                    # print(filename,file_extension)
                     if len(file_extension) < 1:
                         continue
                     if file_extension not in extensions:
@@ -58,8 +61,8 @@ def get_totalsize_of_filetype(root_path):
             try:
                 file_path = os.path.join(root_path, d)
                 file_stats = os.stat(file_path)
-                split_tup = os.path.splitext(d)
-                file_extension = split_tup[1]
+                file_extension = identify_file_extension(file_path)
+                # print(d,file_extension)
                 if len(file_extension) < 1:
                     continue
                 if file_extension not in extensions:
