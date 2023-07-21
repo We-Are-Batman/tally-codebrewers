@@ -16,6 +16,7 @@ from file_deletion import delete_files_multithread
 from preview_file import preview_file
 from duplicate_files import automaticDeletion
 from os_temp_files_size import get_temp_files_info
+from file_deletion import delete_bin_contents
 
 extensions = {}
 
@@ -29,6 +30,32 @@ def validate_path(path):
         show_insights_page(path)
     else:
         error_label.config(text="Invalid path. Please enter a valid directory.")
+
+def validate_threshold(path,threshold,error_label):
+    if threshold=="":
+        error_label.config(text="Please enter a valid threshold.")
+    elif threshold.isnumeric():
+        error_label.config(text="")
+        show_large_files_page(path,threshold)
+    else:
+        error_label.config(text="Please enter a valid threshold.")
+
+def validate_insights_page(path,extension,error_lable):
+    if extension=="":
+        error_lable.config(text="Please enter a valid extension.")
+    else:
+        error_lable.config(text="")
+        show_filter_by_extension_page(path,extension)
+
+def select_all_rows(tree,select_string_var):
+        if select_string_var.get() == "Select All Rows":
+            selected_rows = tree.get_children()
+            tree.selection_set(selected_rows)
+            select_string_var.set("Deselect All Rows")
+        else:
+            tree.selection_remove(tree.selection())
+            select_string_var.set("Select All Rows")
+
 
 
 def delete_selected_files(path, tree,page):
@@ -60,6 +87,15 @@ def delete_auto_selected_files(path, tree):
         paths_to_delete.append(selected_path)
     automaticDeletion(paths_to_delete)
     show_duplicate_files_page(path)
+
+def empty_recycle_bin():
+    delete_bin_contents()
+    show_homepage()
+
+def on_close():
+    delete_bin_contents()
+    root.destroy()
+
 
 def show_duplicate_files_page(path):
 
@@ -160,6 +196,11 @@ def show_duplicate_files_page(path):
 
     frame3 = tk.Frame(frame, bg="#93a8f5")
 
+    select_string_var = tk.StringVar(value="Select All Rows")
+
+    select_all_btn = tk.Button(frame3, textvariable=select_string_var, bg="#f0f0f0", fg="#000000",font=("Helvetica", 10, "bold"),width=40,command=lambda: select_all_rows(tree,select_string_var))
+    select_all_btn.pack(anchor='center',padx=20, pady=10)
+
     preview_btn = tk.Button(frame3, text="Preview", bg="#f0f0f0", fg="#0000ff",font=("Helvetica", 10, "bold"),width=40,command=lambda: preview_btn_click())
     preview_btn.pack(anchor='center',padx=20, pady=10)
 
@@ -201,7 +242,7 @@ def show_duplicate_files_page(path):
 
 
 
-def show_large_files_page(path,threshold=4*1024.0,extension="*"):
+def show_large_files_page(path,threshold=0.0,extension="*"):
 
     def go_back():
         show_insights_page(path)
@@ -219,13 +260,16 @@ def show_large_files_page(path,threshold=4*1024.0,extension="*"):
 
     frame1 = tk.Frame(frame, bg="#93a8f5")
 
+    error_label = tk.Label(frame1, text="", fg="red", bg="#93a8f5")
+    error_label.pack(anchor='center',padx=20, pady=10)
+
     back_btn = tk.Button(frame1, text="Back", bg="#f0f0f0", fg="#000000", font=("Helvetica", 10, "bold"), width=10, command=go_back)
     back_btn.pack(anchor='center',padx=20, pady=10)
 
     get_threshold_entry = ttk.Entry(frame1, width=20, font=("Helvetica", 10, "bold"))
     get_threshold_entry.pack(anchor='center',padx=20, pady=10,side="left")
 
-    set_threshold_btn = tk.Button(frame1, text="Set Threshold in KB", bg="#f0f0f0", fg="#000000", font=("Helvetica", 10, "bold"), width=20,command=lambda: show_large_files_page(path,get_threshold_entry.get()))
+    set_threshold_btn = tk.Button(frame1, text="Set Threshold in KB", bg="#f0f0f0", fg="#000000", font=("Helvetica", 10, "bold"), width=20,command=lambda: validate_threshold(path,get_threshold_entry.get(),error_label))
     set_threshold_btn.pack(anchor='center',padx=20, pady=10,side="right")
 
     frame1.pack(anchor='center',padx=20, pady=10)
@@ -233,6 +277,9 @@ def show_large_files_page(path,threshold=4*1024.0,extension="*"):
     s.configure("Treeview.Heading", foreground='blue', font=("Helvetica", 10, "bold"))
 
     frame2= tk.Frame(frame, bg="#93a8f5")
+
+    help_label = tk.Label(frame2, text="Use Ctrl + Left Click to select multiple files", bg="#93a8f5", font=("Helvetica", 10))
+    help_label.pack(anchor='w',padx=20, pady=10)
 
     tree = ttk.Treeview(frame2,height=10)
     vsb = Scrollbar(frame2, orient="vertical", command=tree.yview)
@@ -255,6 +302,11 @@ def show_large_files_page(path,threshold=4*1024.0,extension="*"):
     files = get_large_files(path, threshold, extension)
 
     frame3 = tk.Frame(frame, bg="#93a8f5")
+
+    select_string_var = tk.StringVar(value="Select All Rows")
+
+    select_all_btn = tk.Button(frame3, textvariable=select_string_var, bg="#f0f0f0", fg="#000000",font=("Helvetica", 10, "bold"),width=40,command=lambda: select_all_rows(tree,select_string_var))
+    select_all_btn.pack(anchor='center',padx=20, pady=10)
 
     preview_btn = tk.Button(frame3, text="Preview", bg="#f0f0f0", fg="#0000ff",font=("Helvetica", 10, "bold"),width=40,command=lambda: preview_btn_click())
     preview_btn.pack(anchor='center',padx=20, pady=10)
@@ -319,6 +371,9 @@ def show_filter_by_filetype_page(path,filetype,files_dict):
     s.configure("Treeview.Heading", foreground='blue', font=("Helvetica", 10, "bold"))
 
     frame2= tk.Frame(frame, bg="#93a8f5")
+    
+    help_label = tk.Label(frame2, text="Use Ctrl + Left Click to select multiple files", bg="#93a8f5", font=("Helvetica", 10))
+    help_label.pack(anchor='w',padx=20, pady=10)
 
     tree = ttk.Treeview(frame2,height=10)
     vsb = Scrollbar(frame2, orient="vertical", command=tree.yview)
@@ -337,6 +392,11 @@ def show_filter_by_filetype_page(path,filetype,files_dict):
     frame2.pack(anchor='center',padx=20, pady=10)
 
     frame3 = tk.Frame(frame, bg="#93a8f5")
+
+    select_string_var = tk.StringVar(value="Select All Rows")
+
+    select_all_btn = tk.Button(frame3, textvariable=select_string_var, bg="#f0f0f0", fg="#000000",font=("Helvetica", 10, "bold"),width=40,command=lambda: select_all_rows(tree,select_string_var))
+    select_all_btn.pack(anchor='center',padx=20, pady=10)
 
     preview_btn = tk.Button(frame3, text="Preview", bg="#f0f0f0", fg="#0000ff",font=("Helvetica", 10, "bold"),width=40,command=lambda: preview_btn_click())
     preview_btn.pack(anchor='center',padx=20, pady=10)
@@ -371,6 +431,8 @@ def show_filter_by_extension_page(path,ext):
         show_insights_page(path)
         frames["filter_by_extension"].destroy()
     
+    
+    
     def preview_btn_click():
         selected_item = tree.selection()
         if selected_item:
@@ -384,12 +446,15 @@ def show_filter_by_extension_page(path,ext):
 
     frame1 = tk.Frame(frame, bg="#93a8f5")
 
+    error_label = tk.Label(frame1, text="", fg="red", bg="#93a8f5")
+    error_label.pack(anchor='center',padx=20, pady=10)
+
     back_btn = tk.Button(frame1, text="Back", bg="#f0f0f0", fg="#000000", font=("Helvetica", 10, "bold"), width=10, command=go_back)
     back_btn.pack(anchor='center',padx=20, pady=10)
     get_extension_entry = ttk.Entry(frame1, width=20, font=("Helvetica", 10, "bold"))
     get_extension_entry.pack(anchor='center',padx=20, pady=10,side="left")
 
-    filter_by_extension_btn = tk.Button(frame1, text="Search By Extension", bg="#f0f0f0", fg="#000000", font=("Helvetica", 10, "bold"), width=20,command=lambda: show_filter_by_extension_page(path,get_extension_entry.get()))
+    filter_by_extension_btn = tk.Button(frame1, text="Search By Extension", bg="#f0f0f0", fg="#000000", font=("Helvetica", 10, "bold"), width=20,command=lambda: validate_insights_page(path,get_extension_entry.get(),error_label))
     filter_by_extension_btn.pack(anchor='center',padx=20, pady=10,side="right")
 
     
@@ -399,6 +464,9 @@ def show_filter_by_extension_page(path,ext):
     s.configure("Treeview.Heading", foreground='blue', font=("Helvetica", 10, "bold"))
 
     frame2= tk.Frame(frame, bg="#93a8f5")
+
+    help_label = tk.Label(frame2, text="Use Ctrl + Left Click to select multiple files", bg="#93a8f5", font=("Helvetica", 10))
+    help_label.pack(anchor='w',padx=20, pady=10)
 
     tree = ttk.Treeview(frame2,height=10)
     vsb = Scrollbar(frame2, orient="vertical", command=tree.yview)
@@ -418,6 +486,11 @@ def show_filter_by_extension_page(path,ext):
     files = filter_files_by_extension(path,ext)
 
     frame3 = tk.Frame(frame, bg="#93a8f5")
+
+    select_string_var = tk.StringVar(value="Select All Rows")
+
+    select_all_btn = tk.Button(frame3, textvariable=select_string_var, bg="#f0f0f0", fg="#000000",font=("Helvetica", 10, "bold"),width=40,command=lambda: select_all_rows(tree,select_string_var))
+    select_all_btn.pack(anchor='center',padx=20, pady=10)
 
     preview_btn = tk.Button(frame3, text="Preview", bg="#f0f0f0", fg="#0000ff",font=("Helvetica", 10, "bold"),width=40,command=lambda: preview_btn_click())
     preview_btn.pack(anchor='center',padx=20, pady=10)
@@ -479,6 +552,9 @@ def show_insights_page(path):
 
     row_count = 0
 
+    error_label = tk.Label(insights_frame, text="", fg="red", bg="#93a8f5")
+    error_label.pack(anchor='center',padx=20, pady=10)
+
     back_btn = tk.Button(insights_frame, text="Back", bg="#f0f0f0", fg="#000000", font=("Helvetica", 10, "bold"), width=10, command=go_back)
     back_btn.pack(anchor='center',padx=20, pady=10)
     row_count += 1
@@ -517,7 +593,7 @@ def show_insights_page(path):
     detect_duplicate_btn = tk.Button(insights_frame, text="Detect Duplicates", bg="#f0f0f0", fg="#000000", font=("Helvetica", 10, "bold"), width=40,command=lambda: show_duplicate_files_page(path))
     detect_duplicate_btn.pack(anchor='center',padx=20, pady=10)
 
-    id_large_files_btn = tk.Button(insights_frame, text="Identify Large Files", bg="#f0f0f0", fg="#000000", font=("Helvetica", 10, "bold"), width=40,command=lambda: show_large_files_page(path))
+    id_large_files_btn = tk.Button(insights_frame, text="See All Files", bg="#f0f0f0", fg="#000000", font=("Helvetica", 10, "bold"), width=40,command=lambda: show_large_files_page(path))
     id_large_files_btn.pack(anchor='center',padx=20, pady=10)
 
     frame1 = tk.Frame(insights_frame, bg="#93a8f5")
@@ -540,7 +616,7 @@ def show_insights_page(path):
     get_extension_entry = ttk.Entry(frame2, width=20, font=("Helvetica", 10, "bold"))
     get_extension_entry.pack(anchor='center',padx=20, pady=10,side="left")
 
-    filter_by_extension_btn = tk.Button(frame2, text="Search By Extension", bg="#f0f0f0", fg="#000000", font=("Helvetica", 10, "bold"), width=20,command=lambda: show_filter_by_extension_page(path,get_extension_entry.get()))
+    filter_by_extension_btn = tk.Button(frame2, text="Search By Extension", bg="#f0f0f0", fg="#000000", font=("Helvetica", 10, "bold"), width=20,command=lambda: validate_insights_page(path,get_extension_entry.get(),error_label))
     filter_by_extension_btn.pack(anchor='center',padx=20, pady=10,side="right")
 
     frame2.pack(anchor='center',padx=20, pady=10)
@@ -629,6 +705,9 @@ if __name__ == "__main__":
     get_insights_btn.pack(anchor='center',padx=20, pady=10)
     row_count += 1
 
+    empty_bin_btn = tk.Button(home_frame, text="Empty Recycle Bin", bg="#f0f0f0", fg="#ff0000", font=("Helvetica", 10, "bold"), width=40, command=empty_recycle_bin)
+    empty_bin_btn.pack(anchor='center',padx=20, pady=10)
+
     error_label = tk.Label(home_frame, text="", fg="red", bg="#93a8f5")
     error_label.pack(anchor='center',padx=20, pady=10)
     row_count += 1
@@ -637,5 +716,6 @@ if __name__ == "__main__":
 
     show_homepage()
 
+    root.protocol("WM_DELETE_WINDOW", on_close)
 
     root.mainloop()
