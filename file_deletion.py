@@ -80,6 +80,7 @@ import shutil
 import threading
 
 def delete_bin_contents(folder_path=deleted_files_path):
+    ensure_folder_exists(deleted_files_path)
     def delete_file_or_directory(path):
         try:
             if os.path.isfile(path):
