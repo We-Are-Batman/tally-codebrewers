@@ -16,14 +16,16 @@ def filter_files_by_extension(root_path, ext):
         ext = '.' + ext
     def filter_by_ext(dir_path, ext):
         file_list = []
-        for _, _, files in os.walk(dir_path):
+        for root, _, files in os.walk(dir_path):
             for filename in files:
+                file_path = os.path.join(root, filename)
+                file_stats = os.stat(file_path)
                 split_tup = os.path.splitext(filename)
                 file_extension = split_tup[1]
                 if len(file_extension) < 1:
                     continue
                 if file_extension == ext:
-                    size = os.stat(os.path.join(dir_path, filename)).st_size
+                    size = file_stats.st_size
                     file_list.append((filename, size))
 
         return file_list
@@ -33,15 +35,31 @@ def filter_files_by_extension(root_path, ext):
         found_files.extend(file_list)
 
     # Get a list of all directories in the root path
-    directories = [os.path.join(root_path, d) for d in os.listdir(
-        root_path) if os.path.isdir(os.path.join(root_path, d))]
+    # directories = [os.path.join(root_path, d) for d in os.listdir(
+    #     root_path) if os.path.isdir(os.path.join(root_path, d))]
+    directories = []
+    for d in os.listdir(root_path):
+        if os.path.isdir(os.path.join(root_path, d)):
+            directories.append(os.path.join(root_path, d))
+        elif os.path.isfile(os.path.join(root_path, d)):
+            try:
+                # print(d)
+                file_path = os.path.join(root_path, d)
+                file_stats = os.stat(file_path)
+                split_tup = os.path.splitext(d)
+                file_extension = split_tup[1]
+                if len(file_extension) < 1:
+                    continue
+
+                if file_extension == ext:
+                    size = file_stats.st_size
+                    found_files.append((d, size))
+            except:
+                    pass
 
     # Create a ThreadPoolExecutor with a number of threads (use as many as the number of CPU cores)
     num_threads = min(len(directories), os.cpu_count())
-    if num_threads == 0:
-        process_directory(root_path)
-        return found_files
-    else:
+    if num_threads > 0:
         with concurrent.futures.ThreadPoolExecutor(max_workers=num_threads) as executor:
             future_to_directory = {executor.submit(
                 process_directory, directory): directory for directory in directories}
@@ -54,6 +72,10 @@ def filter_files_by_extension(root_path, ext):
                 except Exception as e:
                     print(
                         f"An error occurred while searching in {directory}: {e}")
-        return found_files
+    
+    return found_files
 
 
+files = filter_files_by_extension("C:\\Users\\ACER\\Documents","pdf")
+for f in files:
+    print(f)
