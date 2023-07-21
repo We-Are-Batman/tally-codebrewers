@@ -4,10 +4,6 @@
 #Files with any one metadeta same- identify_similar_files(directory) --HELPER FN-identicalFilesbasedOnMetadata(directory_to_scan)
 #Delete duplicate files -deleteDuplicateFiles(directory_path)
 
-
-
-
-
 import os
 import hashlib
 from collections import defaultdict
@@ -257,7 +253,3 @@ def deleteDuplicateFiles(directory_path):
         elif choice==2:
             manualDeletion(duplicate_files)
 
-
-
-# directory_path = r"C:\Users\adnan\Downloads\testing"
-# deleteDuplicateFiles(directory_path)
