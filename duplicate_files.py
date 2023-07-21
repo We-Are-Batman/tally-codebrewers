@@ -1,3 +1,13 @@
+#Return files which are exact duplicate based on content-find_duplicate_files(directory) --HELPER FN-duplicatefiles(directory)
+# Files with similar names -find_similar_filenames(directory, similarity_threshold=0.85) ---HELPER FN-similarfiles(directory):
+#Files with similar content- find_similar_files(directory, similarity_threshold=0.85) --HELPER-files_with_similar_content(directory_path)
+#Files with any one metadeta same- identify_similar_files(directory) --HELPER FN-identicalFilesbasedOnMetadata(directory_to_scan)
+#Delete duplicate files -deleteDuplicateFiles(directory_path)
+
+
+
+
+
 import os
 import hashlib
 from collections import defaultdict
@@ -25,6 +35,19 @@ def find_duplicate_files(directory):
     return {file_hash: paths for file_hash, paths in file_hashes.items() if len(paths) > 1}
 
 
+def duplicatefiles(directory):
+    directory_to_scan = directory
+    duplicate_files = find_duplicate_files(directory_to_scan)
+
+    if not duplicate_files:
+        print("No duplicate files found.")
+    else:
+        print("Duplicate files:")
+        for file_hash, file_paths in duplicate_files.items():
+            print(f"Hash: {file_hash}")
+            for file_path in file_paths:
+                print(f" - {file_path}")
+
 def find_similar_filenames(directory, similarity_threshold=0.85):
     similar_files = {}
 
@@ -51,6 +74,20 @@ def find_similar_filenames(directory, similarity_threshold=0.85):
 
     return similar_files
 
+def similarfiles(directory):
+    directory_path = directory
+    similar_files = find_similar_filenames(directory_path)
+
+    if not similar_files:
+        print("No files with similar names found.")
+    else:
+        print("Files with similar names:")
+        for file_key, file_paths in similar_files.items():
+            print(f"Similar group for filename '{file_key}':")
+            for file_path in file_paths:
+                print(f" - File: {os.path.basename(file_path)}")
+                print(f"   Path: {file_path}")
+            print()
 
 def find_similar_files(directory, similarity_threshold=0.85):
     similar_files = {}
@@ -84,35 +121,6 @@ def find_similar_files(directory, similarity_threshold=0.85):
                      value in similar_files.items() if len(value) > 1}
     return similar_files
 
-
-def duplicatefiles(directory):
-    directory_to_scan = directory
-    duplicate_files = find_duplicate_files(directory_to_scan)
-
-    if not duplicate_files:
-        print("No duplicate files found.")
-    else:
-        print("Duplicate files:")
-        for file_hash, file_paths in duplicate_files.items():
-            print(f"Hash: {file_hash}")
-            for file_path in file_paths:
-                print(f" - {file_path}")
-
-
-def similarfiles(directory):
-    directory_path = directory
-    similar_files = find_similar_filenames(directory_path)
-
-    if not similar_files:
-        print("No files with similar names found.")
-    else:
-        print("Files with similar names:")
-        for file_key, file_paths in similar_files.items():
-            print(f"Similar group for filename '{file_key}':")
-            for file_path in file_paths:
-                print(f" - File: {os.path.basename(file_path)}")
-                print(f"   Path: {file_path}")
-            print()
 
 
 def files_with_similar_content(directory_path):
