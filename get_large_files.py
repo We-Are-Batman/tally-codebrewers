@@ -85,7 +85,3 @@ def get_large_files(root_path, thresold, extension):
     found_files.sort(key=lambda x: x[0], reverse=True)
     return found_files
 
-
-# files = get_large_files("C:\\Users\\ACER\\Documents",200*1024,"*")
-# for f in files:
-#     print(f)
