@@ -64,8 +64,6 @@ def identify_file_extension(file_path):
         # If no match found, return ".dat" as the default extension
         return ".dat"
 
-    except FileNotFoundError:
+    except:
         return ".dat"
-    except Exception as e:
-        return f"Error identifying file extension: {e}"
 
