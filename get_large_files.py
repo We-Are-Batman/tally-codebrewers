@@ -57,18 +57,6 @@ def get_large_files(root_path, thresold, extension):
                 future.result()  # Get the result of the thread, but we don't use it here
             except Exception as e:
                 print(f"An error occurred while searching in {directory}: {e}")
-
+    found_files.sort(key=lambda x: x[0], reverse=True)
     return found_files
 
-
-if __name__ == "__main__":
-    # Replace with the drive letter you want to search
-    drive_path = r"C:\Users\adnan\OneDrive\Pictures\Screenshots"
-    thresold = 2000
-    extension = "*"
-
-    found_files = get_large_files(drive_path, thresold, extension)
-    sorted_files = sorted(found_files, key=lambda x: x[0], reverse=True)
-    print(f"Found {len(found_files)} files in drive {drive_path}:")
-    for data in sorted_files:
-        print(data)

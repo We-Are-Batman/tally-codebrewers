@@ -13,9 +13,11 @@ with open('file_association.json') as json_file:
 
 def get_totalsize_of_filetype(root_path):
     found_files = {}
+    total_folder_size = 0
 
     def find_files(directory):
         file_dict = {}
+        size = 0
         for root, _, files in os.walk(directory):
             for filename in files:
                 try:
@@ -34,16 +36,18 @@ def get_totalsize_of_filetype(root_path):
                     if file_dict.get(actual_type) == None:
                         file_dict[actual_type] = 0
 
-                    file_dict[actual_type] = file_dict[actual_type] + \
-                        file_stats.st_size
+                    file_dict[actual_type] = file_dict[actual_type] + file_stats.st_size
+                    size = size + file_stats.st_size
 
                 except:
                     pass
-        return file_dict
+        return file_dict, size
 
     def process_directory(dir_path):
-        file_dict = find_files(dir_path)
+        nonlocal total_folder_size
+        file_dict,folder_size = find_files(dir_path)
         found_files.update(file_dict)
+        total_folder_size += folder_size
 
     # Get a list of all directories in the root path
     directories = [os.path.join(root_path, d) for d in os.listdir(
@@ -53,7 +57,7 @@ def get_totalsize_of_filetype(root_path):
     num_threads = min(len(directories), os.cpu_count())
     if num_threads == 0:
         process_directory(root_path)
-        return found_files
+        return found_files, total_folder_size
     else:
         with concurrent.futures.ThreadPoolExecutor(max_workers=num_threads) as executor:
             future_to_directory = {executor.submit(
@@ -68,16 +72,5 @@ def get_totalsize_of_filetype(root_path):
                     print(
                         f"An error occurred while searching in {directory}: {e}")
 
-        return found_files
+        return found_files, total_folder_size
 
-
-if __name__ == "__main__":
-    # Replace with the drive letter you want to search
-    drive_path = r"C:\Users\adnan\OneDrive\Pictures\Screenshots"
-    # Add more extensions if needed
-
-    found_files = get_totalsize_of_filetype(drive_path)
-    print(f"Found {len(found_files)} file types in path {drive_path}:")
-    for extension, size in found_files.items():
-        tot = float("{:.2f}".format(size / (1024.0)))
-        print(f"for extension {extension} size is {tot} KB")
