@@ -12,6 +12,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 log_files_path=os.getenv("LOG_FILE_PATH")
+folder_path=os.getenv("SCANNING_FOLDER_PATH")
 print(log_files_path)
 def send_old_files_to_archive(file_paths, archive_location, days_threshold):
     try:
