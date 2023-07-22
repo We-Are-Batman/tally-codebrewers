@@ -20,8 +20,11 @@ from os_temp_files_size import get_temp_files_info
 from file_deletion import delete_bin_contents
 from add_list_to_zip import create_zip
 from scheduled_scanning import *
+from merge_files import merge_list_of_text_files
 
 extensions = {}
+
+merged_files_path = r"C:\Users\adnan\OneDrive\Desktop\merged files"
 
 # Read from JSON file into a dictionary
 with open('file_association.json') as json_file:
@@ -163,6 +166,9 @@ def show_infreq_files_page(path,threshold=5):
     error_label = tk.Label(frame1, text="", fg="red", bg="#93a8f5")
     error_label.pack(anchor='center',padx=20, pady=10)
 
+    title_label = tk.Label(frame1, text="View Infrequently Used Files", bg="#93a8f5", font=("Helvetica", 10, "bold"), width=40)
+    title_label.pack(anchor='center',padx=20, pady=10)
+
     back_btn = tk.Button(frame1, text="Back", bg="#f0f0f0", fg="#000000", font=("Helvetica", 10, "bold"), width=10, command=go_back)
     back_btn.pack(anchor='center',padx=20, pady=10)
 
@@ -238,6 +244,153 @@ def show_infreq_files_page(path,threshold=5):
     frames["infreq_files_1"] = frame1
     frames["infreq_files_2"] = frame2
     frames["infreq_files_3"] = frame3
+
+
+def show_similar_files_page(path):
+
+    def go_back():
+        show_insights_page(path)
+        frames["similar_files"].destroy()
+    
+    ind =0
+
+    def insert_in_tree():
+        nonlocal ind
+        nonlocal similar_files_len
+        page_number_var.set(f"Page {ind+1} of {similar_files_len}")
+        tree.delete(*tree.get_children())
+        if ind == 0:
+            previous_btn.configure(state="disabled")
+        else:
+            previous_btn.configure(state="normal")
+        if ind == similar_files_len-1:
+            next_btn.configure(state="disabled")
+        else:
+            next_btn.configure(state="normal")
+        for fpath in similar_files[ind]:
+            # size = float("{:.2f}".format(size / (1024.0)))
+            # if size < 1:
+            #     size = 1
+            # size = int(size)
+            # size = f"{size} KB"
+            tree.insert("", tk.END, values=(fpath))
+    
+    def validate_merge_files():
+        selected_items = tree.selection()
+        if len(selected_items) == 0:
+            error_label.config(text="Please select a file to merge.")
+            return
+        paths_to_merge = []
+        for item in selected_items:
+            selected_row = tree.item(item)
+            selected_path = selected_row['values'][0]  
+            #check extension if it is a text file
+            if not selected_path.endswith(".txt"):
+                error_label.config(text="Please select only text files to merge.")
+                return
+            selected_path = os.path.join(path,selected_path)
+            paths_to_merge.append(selected_path)
+        if len(paths_to_merge) < 2:
+            error_label.config(text="Please select atleast 2 files to merge.")
+            return
+        #create merged file name with timestamp
+        merged_file_name = str(datetime.datetime.now().strftime("%Y%m%d%H%M%S"))+"_merged.txt"
+        merge_list_of_text_files(paths_to_merge,os.path.join(merged_files_path,merged_file_name))
+        messagebox.showinfo("Success", "Files Merged Successfully")
+        show_similar_files_page(path)
+    
+    def next():
+        nonlocal ind
+        ind += 1
+        insert_in_tree()
+
+    def previous():
+        nonlocal ind
+        ind -= 1
+        insert_in_tree()
+    
+    frame = tk.Frame(root, bg="#93a8f5")
+
+    frame1 = tk.Frame(frame, bg="#93a8f5")
+
+    title_label = tk.Label(frame1, text="Similar Files", bg="#93a8f5", font=("Helvetica", 10, "bold"), width=40)
+    title_label.pack(anchor='center',padx=20, pady=10)
+
+    back_btn = tk.Button(frame1, text="Back", bg="#f0f0f0", fg="#000000",font=("Helvetica", 10, "bold"),width=20,command=go_back)
+    back_btn.pack(anchor='center',padx=20, pady=10)
+
+    page_number_var = tk.StringVar(value="Page 1 of 1")
+    page_number_label = tk.Label(frame1, textvariable=page_number_var, bg="#93a8f5", font=("Helvetica", 10, "bold"), width=40)
+    page_number_label.pack(anchor='center',padx=20, pady=10)
+
+    help_label = tk.Label(frame1, text="Use Ctrl + Left Click to select multiple files", bg="#93a8f5", font=("Helvetica", 10))
+    help_label.pack(anchor='w',padx=20, pady=10)
+
+    s.configure("Treeview.Heading", foreground='blue', font=("Helvetica", 10, "bold"))
+
+    tree = ttk.Treeview(frame1,height=10)
+    vsb = Scrollbar(frame1, orient="vertical", command=tree.yview)
+    tree.configure(yscrollcommand=vsb.set)
+    tree["columns"]=("fpath")
+    tree["show"]="headings"
+    
+    tree.column("fpath",width=500, anchor="w")
+    tree.heading("fpath", text="Path",anchor=tk.CENTER)
+
+
+    tree.pack(side='left',padx=20, pady=10)
+
+    vsb.pack(side="right", fill="y")
+
+    frame1.pack(anchor='center',padx=20, pady=10)
+
+    frame2 = tk.Frame(frame, bg="#93a8f5")
+
+    previous_btn = tk.Button(frame2, text="Previous", bg="#f0f0f0", fg="#000000",font=("Helvetica", 10, "bold"),width=20,command=previous)
+    previous_btn.pack(anchor='center',padx=20, pady=10,side="left")
+
+    next_btn = tk.Button(frame2, text="Next", bg="#f0f0f0", fg="#000000",font=("Helvetica", 10, "bold"),width=20,command=next)
+    next_btn.pack(anchor='center',padx=20, pady=10,side="right")
+
+    frame2.pack(anchor='center',padx=20, pady=10)
+
+    frame3 = tk.Frame(frame, bg="#93a8f5")
+
+    select_string_var = tk.StringVar(value="Select All Rows")
+    
+    select_all_btn = tk.Button(frame3, textvariable=select_string_var, bg="#f0f0f0", fg="#000000",font=("Helvetica", 10, "bold"),width=40,command=lambda: select_all_rows(tree,select_string_var))
+    select_all_btn.pack(anchor='center',padx=20, pady=10)           
+
+    preview_btn = tk.Button(frame3, text="Preview", bg="#f0f0f0", fg="#0000ff",font=("Helvetica", 10, "bold"),width=40,command=lambda: preview_btn_click(path,tree,error_label))
+    preview_btn.pack(anchor='center',padx=20, pady=10)
+
+    merge_files_btn = tk.Button(frame3, text="Merge Files", bg="#f0f0f0", fg="#0000ff",font=("Helvetica", 10, "bold"),width=40,command=validate_merge_files)
+    merge_files_btn.pack(anchor='center',padx=20, pady=10)
+
+    delete_manually_btn = tk.Button(frame3, text="Delete Files", bg="#f0f0f0", fg="#ff0000",font=("Helvetica", 10, "bold"),width=40,command=lambda: delete_selected_files(path,tree,"duplicate",error_label))
+    delete_manually_btn.pack(anchor='center',padx=20, pady=10)
+
+
+    frame3.pack(anchor='center',padx=20, pady=10)
+
+    similar_files = find_similar_files(path)
+
+    #convert this to a list of lists
+    similar_files = list(similar_files.values())
+
+    similar_files_len = len(similar_files)
+
+    insert_in_tree()
+
+    for f in frames.values():
+        f.pack_forget()
+    
+    frame.pack(anchor='center',padx=20, pady=10)
+
+    frames["similar_files"] = frame
+    frames["similar_files_1"] = frame1
+    frames["similar_files_2"] = frame2
+    frames["similar_files_3"] = frame3
 
 
     
@@ -415,6 +568,9 @@ def show_large_files_page(path,threshold=0.0,extension="*"):
     error_label = tk.Label(frame1, text="", fg="red", bg="#93a8f5")
     error_label.pack(anchor='center',padx=20, pady=10)
 
+    title_label = tk.Label(frame1, text="View Large Files", bg="#93a8f5", font=("Helvetica", 10, "bold"), width=40)
+    title_label.pack(anchor='center',padx=20, pady=10)
+
     back_btn = tk.Button(frame1, text="Back", bg="#f0f0f0", fg="#000000", font=("Helvetica", 10, "bold"), width=10, command=go_back)
     back_btn.pack(anchor='center',padx=20, pady=10)
 
@@ -500,6 +656,9 @@ def show_filter_by_filetype_page(path,filetype,files_dict):
     frame = tk.Frame(root, bg="#93a8f5")
 
     frame1 = tk.Frame(frame, bg="#93a8f5")
+
+    title_label = tk.Label(frame1, text="Filter by File Type", bg="#93a8f5", font=("Helvetica", 10, "bold"), width=40)
+    title_label.pack(anchor='center',padx=20, pady=10)
 
     back_btn = tk.Button(frame1, text="Back", bg="#f0f0f0", fg="#000000", font=("Helvetica", 10, "bold"), width=10, command=go_back)
     back_btn.pack(anchor='center',padx=20, pady=10)
@@ -587,6 +746,9 @@ def show_filter_by_extension_page(path,ext):
 
     error_label = tk.Label(frame1, text="", fg="red", bg="#93a8f5")
     error_label.pack(anchor='center',padx=20, pady=10)
+
+    title_label = tk.Label(frame1, text="Filter by Extension", bg="#93a8f5", font=("Helvetica", 10, "bold"), width=40)
+    title_label.pack(anchor='center',padx=20, pady=10)
 
     back_btn = tk.Button(frame1, text="Back", bg="#f0f0f0", fg="#000000", font=("Helvetica", 10, "bold"), width=10, command=go_back)
     back_btn.pack(anchor='center',padx=20, pady=10)
@@ -694,6 +856,9 @@ def show_insights_page(path):
     error_label = tk.Label(insights_frame, text="", fg="red", bg="#93a8f5")
     error_label.pack(anchor='center',padx=20, pady=10)
 
+    title_label = tk.Label(insights_frame, text="Insights", bg="#93a8f5", font=("Helvetica", 10, "bold"), width=40)
+    title_label.pack(anchor='center',padx=20, pady=10)
+
     back_btn = tk.Button(insights_frame, text="Back", bg="#f0f0f0", fg="#000000", font=("Helvetica", 10, "bold"), width=10, command=go_back)
     back_btn.pack(anchor='center',padx=20, pady=10)
     row_count += 1
@@ -731,6 +896,9 @@ def show_insights_page(path):
 
     detect_duplicate_btn = tk.Button(insights_frame, text="Detect Duplicates", bg="#f0f0f0", fg="#000000", font=("Helvetica", 10, "bold"), width=40,command=lambda: show_duplicate_files_page(path))
     detect_duplicate_btn.pack(anchor='center',padx=20, pady=10)
+
+    detect_similar_btn = tk.Button(insights_frame, text="Detect Similar Files", bg="#f0f0f0", fg="#000000", font=("Helvetica", 10, "bold"), width=40,command=lambda: show_similar_files_page(path))
+    detect_similar_btn.pack(anchor='center',padx=20, pady=10)
 
     id_large_files_btn = tk.Button(insights_frame, text="See All Files", bg="#f0f0f0", fg="#000000", font=("Helvetica", 10, "bold"), width=40,command=lambda: show_large_files_page(path))
     id_large_files_btn.pack(anchor='center',padx=20, pady=10)
