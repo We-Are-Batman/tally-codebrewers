@@ -8,9 +8,11 @@ import psutil
 import shutil
 import datetime
 from add_list_to_zip import create_zip
-folder_path=r"D:\University"
+from dotenv import load_dotenv
 
-
+load_dotenv()
+log_files_path=os.getenv("LOG_FILE_PATH")
+print(log_files_path)
 def send_old_files_to_archive(file_paths, archive_location, days_threshold):
     try:
         now = datetime.now()
@@ -162,7 +164,7 @@ def generate_report(folder_path):
         disk_health_status ="Disk Health Status for Drive "+drive_letter+ monitor_disk_health(drive_letter)
 
     # Write the report to a text file
-    with open("disk_space_report.txt", "w") as f:
+    with open(log_files_path, "w") as f:
         f.write("Disk Space Usage Analysis:\n")
         f.write(f"Total Space: {disk_space_usage['total_space'] / (1024 ** 3):.2f} GB\n")
         f.write(f"Used Space: {disk_space_usage['used_space'] / (1024 ** 3):.2f} GB\n")
