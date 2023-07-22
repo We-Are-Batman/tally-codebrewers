@@ -56,15 +56,15 @@ def merge_list_of_text_files(file_paths, output_file):
     
 
         
-if __name__ == "__main__":
-    file1_path = r"C:\Users\kabir\OneDrive\Desktop\testfile\mergetestfile1.txt"
-    file2_path = r"C:\Users\kabir\OneDrive\Desktop\testfile\mergetestfile2.txt"
-    file3_path = r"C:\Users\kabir\OneDrive\Desktop\testfile\mergetestfile3.txt"
-    file4_path = r"C:\Users\kabir\OneDrive\Desktop\testfile\mergetestfile4.txt"
-    output_file_path = r"C:\Users\kabir\OneDrive\Desktop\testfile\merged.txt"
+# if __name__ == "__main__":
+#     file1_path = r"C:\Users\kabir\OneDrive\Desktop\testfile\mergetestfile1.txt"
+#     file2_path = r"C:\Users\kabir\OneDrive\Desktop\testfile\mergetestfile2.txt"
+#     file3_path = r"C:\Users\kabir\OneDrive\Desktop\testfile\mergetestfile3.txt"
+#     file4_path = r"C:\Users\kabir\OneDrive\Desktop\testfile\mergetestfile4.txt"
+#     output_file_path = r"C:\Users\kabir\OneDrive\Desktop\testfile\merged.txt"
 
-    # merge_text_files(file1_path, file2_path, output_file_path)
-    merge_list_of_text_files([file1_path,file2_path,file3_path,file4_path],output_file_path)
-    # Replace file1.txt and file2.txt with the merged content
+#     # merge_text_files(file1_path, file2_path, output_file_path)
+#     merge_list_of_text_files([file1_path,file2_path,file3_path,file4_path],output_file_path)
+#     # Replace file1.txt and file2.txt with the merged content
 
     
