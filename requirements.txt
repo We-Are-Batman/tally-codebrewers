@@ -1,4 +1,5 @@
 psutil==5.9.5
+python-dotenv==1.0.0
 python-magic==0.4.27
 python-magic-bin==0.4.14
 pywin32==306
