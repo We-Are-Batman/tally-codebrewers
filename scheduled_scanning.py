@@ -117,9 +117,15 @@ def identify_duplicate_files(folder_path):
     return duplicate_files
 
 def get_file_last_access_time(file_path):
-    return os.path.getatime(file_path)
-
+    try:
+        last_modified_timestamp = os.path.getmtime(file_path)
+        return last_modified_timestamp
+    except Exception as e:
+        print(f"Error: {e}")
+        return None
+    
 def identify_least_frequently_accessed_files(folder_path, days_threshold):
+    print(days_threshold)
     current_time = time.time()
     days_threshold_seconds = days_threshold * 24 * 60 * 60
 
@@ -128,8 +134,9 @@ def identify_least_frequently_accessed_files(folder_path, days_threshold):
         for file in files:
             file_path = os.path.join(root, file)
             last_access_time = get_file_last_access_time(file_path)
+            print(last_access_time)
             time_difference = current_time - last_access_time
-
+            print(time_difference)
             if time_difference >= days_threshold_seconds:
                 least_frequent_files.append((file_path, time_difference / (24 * 60 * 60)))
 
@@ -204,17 +211,19 @@ def get_scan_interval_from_user():
 
 if __name__ == "__main__":
     # Get the scan interval from the user
-    interval_minutes = get_scan_interval_from_user()
+    # interval_minutes = get_scan_interval_from_user()
 
     # Schedule the scan_and_manage_disk_space function to run at the specified interval
-    schedule.every(interval_minutes).minutes.do(scan_and_manage_disk_space)
+    # schedule.every(interval_minutes).minutes.do(scan_and_manage_disk_space)
 
     # Print the scheduled interval to the user
-    print(f"Scheduled disk space scanning and management every {interval_minutes} minutes.")
+    # print(f"Scheduled disk space scanning and management every {interval_minutes} minutes.")
     
     # Main loop to run the scheduled tasks
-    while True:
-        schedule.run_pending()
-        time.sleep(1)  # Sleep for 1 second to avoid excessive CPU usage
+    # print(identify_least_frequently_accessed_files(folder_path,90))
+    print(identify_least_frequently_accessed_files(r"D:\University\CD",5))
+    # while True:
+        # schedule.run_pending()
+        # time.sleep(1)  # Sleep for 1 second to avoid excessive CPU usage
 
 
