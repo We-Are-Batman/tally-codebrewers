@@ -212,21 +212,21 @@ def get_scan_interval_from_user():
 
 
 
-if __name__ == "__main__":
-    # Get the scan interval from the user
-    # interval_minutes = get_scan_interval_from_user()
+# if __name__ == "__main__":
+#     # Get the scan interval from the user
+#     # interval_minutes = get_scan_interval_from_user()
 
-    # Schedule the scan_and_manage_disk_space function to run at the specified interval
-    # schedule.every(interval_minutes).minutes.do(scan_and_manage_disk_space)
+#     # Schedule the scan_and_manage_disk_space function to run at the specified interval
+#     # schedule.every(interval_minutes).minutes.do(scan_and_manage_disk_space)
 
-    # Print the scheduled interval to the user
-    # print(f"Scheduled disk space scanning and management every {interval_minutes} minutes.")
+#     # Print the scheduled interval to the user
+#     # print(f"Scheduled disk space scanning and management every {interval_minutes} minutes.")
     
-    # Main loop to run the scheduled tasks
-    # print(identify_least_frequently_accessed_files(folder_path,90))
-    print(identify_least_frequently_accessed_files(r"D:\University\CD",5))
-    # while True:
-        # schedule.run_pending()
-        # time.sleep(1)  # Sleep for 1 second to avoid excessive CPU usage
+#     # Main loop to run the scheduled tasks
+#     # print(identify_least_frequently_accessed_files(folder_path,90))
+#     print(identify_least_frequently_accessed_files(r"D:\University\CD",5))
+#     # while True:
+#         # schedule.run_pending()
+#         # time.sleep(1)  # Sleep for 1 second to avoid excessive CPU usage
 
 
