@@ -12,6 +12,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 folder_path=os.getenv("SCANNING_FOLDER_PATH")
+intervaltime=os.getenv("SCANNING_DURATION")
 def send_old_files_to_archive(file_paths, archive_location, days_threshold):
     try:
         now = datetime.now()
@@ -174,6 +175,7 @@ def generate_report(folder_path):
 
     # print(type(log_file_name))
     # print(log_files_path)
+    finallist.append(log_file_name)
     try:
         with open(log_file_name, "w") as f:
             f.write("Disk Space Usage Analysis:\n")
@@ -188,20 +190,21 @@ def generate_report(folder_path):
     except Exception as e:
         print(f"Error occurred while generating the log file: {e}")
        
-        f.write("Least Frequently Accessed Files:\n")
-        for file in least_frequent_files:
-            f.write(f"- {file} (Last Accessed: {time.ctime(get_file_last_access_time(file))})\n")
-        f.write("\n")
+    f.write("Least Frequently Accessed Files:\n")
+    for file in least_frequent_files:
+        f.write(f"- {file} (Last Accessed: {time.ctime(get_file_last_access_time(file))})\n")
+    f.write("\n")
 
-        f.write("Disk Health Status:\n")
-        f.write(f"{disk_health_status}\n")
-        return finallist
+    f.write("Disk Health Status:\n")
+    f.write(f"{disk_health_status}\n")
+    return finallist
     
 # Function for disk space scanning and management (Replace this with your actual scanning and management functions)
 def scan_and_manage_disk_space():
     print("Running disk space scanning and management...")
-    generate_report(folder_path)
+    filelist=generate_report(folder_path)
     send_old_files_to_archive()
+    return filelist
     # Your disk space scanning and management functions go here
 
 def get_scan_interval_from_user():
@@ -217,22 +220,18 @@ def get_scan_interval_from_user():
 
 
 
-if __name__ == "__main__":
-    # Get the scan interval from the user
-    # interval_minutes = get_scan_interval_from_user()
 
-    # Schedule the scan_and_manage_disk_space function to run at the specified interval
-    # schedule.every(interval_minutes).minutes.do(scan_and_manage_disk_space)
+def runner():
+    interval_minutes = intervaltime
+    schedule.every(interval_minutes).minutes.do(scan_and_manage_disk_space)
 
     # Print the scheduled interval to the user
-    # print(f"Scheduled disk space scanning and management every {interval_minutes} minutes.")
+    print(f"Scheduled disk space scanning and management every {interval_minutes} minutes.")
     
     # Main loop to run the scheduled tasks
-    # print(identify_least_frequently_accessed_files(folder_path,90))
-    # print(folder_path)
-    generate_report(folder_path)
-    # while True:
-        # schedule.run_pending()
-        # time.sleep(1)  # Sleep for 1 second to avoid excessive CPU usage
+    print(identify_least_frequently_accessed_files(folder_path,90))
+    while True:
+        schedule.run_pending()
+        time.sleep(1)  # Sleep for 1 second to avoid excessive CPU usage
 
 
