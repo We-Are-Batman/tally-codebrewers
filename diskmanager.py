@@ -137,72 +137,6 @@ def on_close():
 
 
 
-def show_scheduled_scanning_page():
-
-    def go_back():
-        show_homepage()
-        frames["scheduled_scanning"].destroy()
-
-    def f():
-        pass
-
-    frame = tk.Frame(root, bg="#93a8f5")
-
-    frame1 = tk.Frame(frame, bg="#93a8f5")
-
-    heading_label = tk.Label(frame1, text="Logs", bg="#93a8f5", font=("Helvetica", 10, "bold"), width=40)
-    heading_label.pack(anchor='center',padx=20, pady=10)
-
-    back_btn = tk.Button(frame1, text="Back", bg="#f0f0f0", fg="#000000",font=("Helvetica", 10, "bold"),width=20,command=go_back)
-    back_btn.pack(anchor='center',padx=20, pady=10)
-
-    frame1.pack(anchor='center',padx=20, pady=10)
-
-    frame2 = tk.Frame(frame, bg="#93a8f5")
-
-    s.configure("Treeview.Heading", foreground='blue', font=("Helvetica", 10, "bold"))
-
-    tree = ttk.Treeview(frame2,height=10)
-    vsb = Scrollbar(frame2, orient="vertical", command=tree.yview)
-
-    tree["columns"]=("fpath")
-    tree["show"]="headings"
-
-    tree.column("fpath",width=500, anchor="w")
-    tree.heading("fpath", text="Log File",anchor=tk.CENTER)
-
-    tree.pack(side='left',padx=20, pady=10)
-
-    vsb.pack(side="right", fill="y")
-
-    frame2.pack(anchor='center',padx=20, pady=10)
-
-    frame3 = tk.Frame(frame, bg="#93a8f5")
-
-    preview_btn = tk.Button(frame3, text="Preview", bg="#f0f0f0", fg="#0000ff",font=("Helvetica", 10, "bold"),width=40,command=lambda: preview_btn_click(path,tree,error_label))
-    preview_btn.pack(anchor='center',padx=20, pady=10)
-
-    frame3.pack(anchor='center',padx=20, pady=10)
-
-    file_paths = f()
-
-    for file_path in file_paths:
-        tree.insert("", tk.END, values=(file_path))
-    
-    for f in frames.values():
-        f.pack_forget()
-
-    frame.pack(anchor='center',padx=20, pady=10)
-
-    frames["scheduled_scanning"] = frame
-    frames["scheduled_scanning_1"] = frame1
-    frames["scheduled_scanning_2"] = frame2
-    frames["scheduled_scanning_3"] = frame3
-    
-    
-
-
-
 
 
 
@@ -1023,6 +957,8 @@ def browse_directory():
             input_path_text.set(selected_dir)
 
 if __name__ == "__main__":
+
+    # runner()
 
     path=""
 
