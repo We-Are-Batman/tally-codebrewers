@@ -1,12 +1,13 @@
 import os
 import threading
 import shutil
-# from dotenv import dotenv
+from dotenv import load_dotenv
 
-# load_dotenv()
+load_dotenv()
+# DELETION_PATH=
+deleted_files_path=os.getenv("DELETION_PATH")
 
-# deleted_files_path=os.getenv(DELETION_PATH)
-deleted_files_path=r"C:\Users\adnan\OneDrive\Desktop\recyclebin"
+# deleted_files_path=r"C:\Users\adnan\OneDrive\Desktop\recyclebin"
 
 
 def ensure_folder_exists(folder_path):
@@ -117,6 +118,7 @@ def delete_bin_contents(folder_path=deleted_files_path):
 
 
 # if __name__ == "__main__":
+#     print(deleted_files_path)
 #     # directory = r"C:\Users\kabir\OneDrive\Desktop\testfile"
 #     # paths_to_delete = [os.path.join(directory, file) for file in os.listdir(directory)]
 #     # delete_files_multithread(paths_to_delete)
