@@ -22,5 +22,6 @@ SCANNING_FOLDER_PATH="D:\\University\\CD"
 ## Usage
 >Run the diskmanager.py
 
+USE THE TESTING FOLDER FOR YOU CONVENIENT USAGE
 
 
