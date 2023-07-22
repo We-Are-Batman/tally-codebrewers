@@ -210,7 +210,7 @@ def scan_and_manage_disk_space():
 def get_scan_interval_from_user():
     while True:
         try:
-            interval = int(input("Enter the scan interval in minutes (e.g., 60 for 1 hour): "))
+            interval = intervaltime
             if interval <= 0:
                 print("Please enter a positive interval.")
             else:
@@ -222,7 +222,7 @@ def get_scan_interval_from_user():
 
 
 def runner():
-    interval_minutes = intervaltime
+    interval_minutes = get_scan_interval_from_user()
     schedule.every(interval_minutes).minutes.do(scan_and_manage_disk_space)
 
     # Print the scheduled interval to the user

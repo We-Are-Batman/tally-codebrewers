@@ -136,6 +136,10 @@ def on_close():
     root.destroy()
 
 
+
+
+
+
 def show_infreq_files_page(path,threshold=5):
     def go_back():
         show_insights_page(path)
@@ -953,6 +957,8 @@ def browse_directory():
             input_path_text.set(selected_dir)
 
 if __name__ == "__main__":
+
+    # runner()
 
     path=""
 
